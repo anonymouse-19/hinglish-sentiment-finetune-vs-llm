@@ -1,0 +1,21 @@
+# Exact versions used to produce the reported numbers (Phase 1 data, Phase 2 baselines).
+# Fine-tuning dependencies (torch, transformers, peft) are pinned separately for Colab in Phase 3.
+pandas==2.3.3
+numpy==2.5.3
+scipy==1.18.1
+scikit-learn==1.7.2
+huggingface_hub==1.33.0  # transformers 5.18 requires <2
+ftfy==6.3.1
+pyarrow==25.0.1
+PyYAML==6.0.3
+matplotlib==3.11.2
+pytest==9.1.1
+joblib==1.6.0
+openai==3.24.0
+python-dotenv==1.2.4
+torch==2.14.1  # local CPU build for smoke tests; Colab uses its own CUDA build
+transformers==5.18.0
+peft==0.21.2
+accelerate==1.15.0
+wandb==0.30.0
+emoji==2.16.0

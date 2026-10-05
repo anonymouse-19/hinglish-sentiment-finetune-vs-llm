@@ -1,0 +1,10 @@
+# Phase 3 training dependencies for Google Colab (T4). Colab's preinstalled torch/CUDA is used as-is.
+# Versions match the local smoke tests (2026-10-06).
+transformers==5.18.0
+peft==0.21.2
+accelerate==1.15.0
+bitsandbytes==0.50.2
+wandb==0.30.0
+emoji==2.16.0
+ftfy==6.3.1
+huggingface_hub==1.33.0  # transformers 5.18 requires <2

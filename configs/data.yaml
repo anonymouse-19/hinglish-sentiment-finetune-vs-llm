@@ -1,0 +1,34 @@
+# Phase 1 data pipeline config. Every threshold below is explained in docs/DECISION_LOG.md.
+seed: 42
+
+sentimix:
+  repo_id: RTT1/SentiMix  # mirror of the SemEval-2020 Task 9 Hinglish release
+  revision: 205f0391fc1f10320ec3c10708eaa27e88db04c7  # pinned commit for reproducibility
+
+youtube_ood:
+  repo_id: shae2977/hinglish-youtube-sentiments-dataset
+  revision: 84abda5e30d082a66c251fc46513cb89ce866cbb
+  filename: yt_hinglish_comments_dataset.csv
+
+cleaning:
+  # Tweets with >= this many accented letters (an ASCII letter + diacritic: é, ş, ğ, ...) are treated as
+  # non-Hinglish (Turkish, Polish, Norwegian, ...) and removed from train/val.
+  foreign_min_accented_letters: 3
+
+dedupe:
+  # Cosine similarity on char 3-5-gram TF-IDF of tweet content (mentions/URLs removed).
+  near_dup_threshold: 0.9
+
+robustness:
+  # Word-level language share needed to call a tweet "mostly English" / "mostly Hindi".
+  dominant_share: 0.8
+
+split:
+  val_size: 0.15  # of the pooled official train+dev, after cleaning; official test is kept as-is
+  stratify_on: [label, mix_bucket]
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  reports_dir: reports
+  figures_dir: reports/figures

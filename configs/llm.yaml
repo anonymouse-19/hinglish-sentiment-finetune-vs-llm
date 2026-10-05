@@ -1,0 +1,51 @@
+# Phase 2 LLM baselines (zero-/few-shot). Choices explained in docs/DECISION_LOG.md (D-016, D-018 ... D-022).
+# Any OpenAI-compatible provider works: change base_url, api_key_env, model and prices.
+seed: 42
+
+provider: groq
+base_url: https://api.groq.com/openai/v1
+api_key_env: GROQ_API_KEY            # read from the environment or a local .env (never committed)
+
+model: openai/gpt-oss-120b           # check availability with: python scripts/check_llm.py
+
+# USD per 1M tokens. Reasoning tokens are billed as output tokens. Prices change: re-check on the run date.
+prices:
+  as_of: "2026-10-05"
+  source: "Groq model page (console.groq.com/docs/models) and third-party price trackers"
+  input_per_million: 0.15
+  cached_input_per_million: 0.075    # Groq bills prompt-cache hits at a discount; null = same as input
+  output_per_million: 0.60
+
+generation:
+  temperature: 0
+  max_completion_tokens: 1024        # room for the hidden reasoning tokens + the one-word answer
+  reasoning_effort: low              # gpt-oss: low/medium/high. Set to null for non-reasoning models.
+  extra_body: {}                     # provider-specific extras, passed through verbatim
+
+few_shot:
+  per_class: 3                       # 3 x 3 classes = 9 fixed examples drawn from TRAIN only
+  seed: 42
+  # Skip likely-mislabelled tweets: keep only those whose out-of-fold TF-IDF probability of their own
+  # label is >= this (best TF-IDF config from configs/tfidf.yaml). Chosen ids: scripts/select_few_shot.py
+  min_gold_probability: 0.6
+  tfidf_params: {features: word+char, C: 0.3, class_weight: null}
+  ids_path: configs/few_shot_ids.yaml
+
+client:
+  requests_per_minute: 25            # client-side pacing, kept under the free tier's 30 RPM
+  tokens_per_minute: 7000            # ... and under its 8K tokens/min (few-shot requests are ~650 tokens)
+  max_retries: 6                     # on 429 / 5xx / timeouts, with exponential backoff
+  timeout_s: 60
+
+eval:
+  # Stratified (label x language-mix) subset sizes. null = the whole split.
+  # Owner chose the free tier (D-023): 200K tokens/day per model -> ~1M tokens total = ~5 days of runs.
+  n:
+    val: 200
+    test: 600
+    test_youtube: 300
+
+paths:
+  processed_dir: data/processed
+  cache_path: outputs/llm_cache/responses.jsonl   # every raw API response; re-runs cost nothing
+  report_dir: reports/baselines/llm

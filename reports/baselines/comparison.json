@@ -1,0 +1,44 @@
+[
+  {
+    "split":"val",
+    "n":200,
+    "complete":true,
+    "model":"openai\/gpt-oss-120b few-shot",
+    "macro_f1":0.6738264126,
+    "macro_f1_ci_low":0.6080416972,
+    "macro_f1_ci_high":0.7314155109,
+    "n_resamples":1000,
+    "accuracy":0.685,
+    "n_invalid":0,
+    "p50_ms":888.7189499801,
+    "usd_per_1k":0.10140075
+  },
+  {
+    "split":"val",
+    "n":200,
+    "complete":true,
+    "model":"tfidf_logreg (same ids)",
+    "macro_f1":0.6876377505,
+    "macro_f1_ci_low":0.6188319659,
+    "macro_f1_ci_high":0.746491552,
+    "n_resamples":1000,
+    "accuracy":0.685,
+    "n_invalid":0,
+    "p50_ms":1.9049999537,
+    "usd_per_1k":null
+  },
+  {
+    "split":"val",
+    "n":200,
+    "complete":true,
+    "model":"openai\/gpt-oss-120b zero-shot",
+    "macro_f1":0.6018518519,
+    "macro_f1_ci_low":0.531358161,
+    "macro_f1_ci_high":0.6643136668,
+    "n_resamples":1000,
+    "accuracy":0.63,
+    "n_invalid":0,
+    "p50_ms":778.8942500483,
+    "usd_per_1k":0.06999075
+  }
+]

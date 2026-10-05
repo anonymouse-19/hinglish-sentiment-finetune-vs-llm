@@ -1,0 +1,317 @@
+{
+  "config": {
+    "seed": 42,
+    "sentimix": {
+      "repo_id": "RTT1/SentiMix",
+      "revision": "205f0391fc1f10320ec3c10708eaa27e88db04c7"
+    },
+    "youtube_ood": {
+      "repo_id": "shae2977/hinglish-youtube-sentiments-dataset",
+      "revision": "84abda5e30d082a66c251fc46513cb89ce866cbb",
+      "filename": "yt_hinglish_comments_dataset.csv"
+    },
+    "cleaning": {
+      "foreign_min_accented_letters": 3
+    },
+    "dedupe": {
+      "near_dup_threshold": 0.9
+    },
+    "robustness": {
+      "dominant_share": 0.8
+    },
+    "split": {
+      "val_size": 0.15,
+      "stratify_on": [
+        "label",
+        "mix_bucket"
+      ]
+    },
+    "paths": {
+      "raw_dir": "data/raw",
+      "processed_dir": "data/processed",
+      "reports_dir": "reports",
+      "figures_dir": "reports/figures"
+    }
+  },
+  "raw": {
+    "train": {
+      "n": 14000,
+      "labels": {
+        "negative": 4102,
+        "neutral": 5264,
+        "positive": 4634
+      }
+    },
+    "dev": {
+      "n": 3000,
+      "labels": {
+        "negative": 890,
+        "neutral": 1128,
+        "positive": 982
+      }
+    },
+    "test": {
+      "n": 3000,
+      "labels": {
+        "negative": 900,
+        "neutral": 1100,
+        "positive": 1000
+      }
+    }
+  },
+  "cleaning": {
+    "tweets_with_mojibake_repaired": 2119,
+    "retweets": 3165,
+    "truncated_tweets": 11129,
+    "tweets_with_devanagari": 87,
+    "residual_split_mentions": 2,
+    "residual_split_urls": 0,
+    "residual_mojibake": 0
+  },
+  "exact_duplicates_after_masking": {
+    "groups": 658,
+    "rows": 1336,
+    "groups_spanning_official_splits": 315,
+    "groups_with_conflicting_labels": 231,
+    "exact_duplicates_before_masking": 4
+  },
+  "near_duplicates": {
+    "threshold": 0.9,
+    "clusters_with_2plus": 849,
+    "rows_in_those_clusters": 1770,
+    "largest_cluster": 8,
+    "clusters_with_conflicting_labels": 323,
+    "test_rows_with_a_test_near_duplicate": 34
+  },
+  "dropped": {
+    "non_hinglish_language": {
+      "train": 22,
+      "dev": 3
+    },
+    "duplicate_label_conflict": {
+      "train": 359,
+      "dev": 77
+    },
+    "near_duplicate_of_test": {
+      "train": 215,
+      "dev": 56
+    },
+    "no_content": {
+      "train": 74,
+      "dev": 15
+    },
+    "duplicate": {
+      "train": 280,
+      "dev": 123
+    }
+  },
+  "final": {
+    "train": {
+      "n": 13409,
+      "labels": {
+        "negative": 4012,
+        "neutral": 5029,
+        "positive": 4368
+      },
+      "mix_bucket": {
+        "mostly_hindi": 5506,
+        "code_mixed": 6441,
+        "mostly_english": 1462,
+        "no_lang_words": 0
+      },
+      "mix_bucket_x_label": {
+        "mostly_hindi": {
+          "negative": 2296,
+          "neutral": 1951,
+          "positive": 1259
+        },
+        "code_mixed": {
+          "negative": 1569,
+          "neutral": 2500,
+          "positive": 2372
+        },
+        "mostly_english": {
+          "negative": 147,
+          "neutral": 578,
+          "positive": 737
+        },
+        "no_lang_words": {
+          "negative": 0,
+          "neutral": 0,
+          "positive": 0
+        }
+      },
+      "chars": {
+        "count": 13409.0,
+        "mean": 99.2,
+        "std": 23.4,
+        "min": 17.0,
+        "50%": 107.0,
+        "95%": 126.0,
+        "max": 145.0
+      },
+      "words": {
+        "count": 13409.0,
+        "mean": 16.6,
+        "std": 5.3,
+        "min": 0.0,
+        "50%": 18.0,
+        "95%": 24.0,
+        "max": 32.0
+      },
+      "cmi_mean": 21.39,
+      "has_devanagari": 56,
+      "retweets": 2009,
+      "truncated": 7317
+    },
+    "val": {
+      "n": 2367,
+      "labels": {
+        "negative": 708,
+        "neutral": 887,
+        "positive": 772
+      },
+      "mix_bucket": {
+        "mostly_hindi": 972,
+        "code_mixed": 1137,
+        "mostly_english": 258,
+        "no_lang_words": 0
+      },
+      "mix_bucket_x_label": {
+        "mostly_hindi": {
+          "negative": 405,
+          "neutral": 344,
+          "positive": 223
+        },
+        "code_mixed": {
+          "negative": 277,
+          "neutral": 441,
+          "positive": 419
+        },
+        "mostly_english": {
+          "negative": 26,
+          "neutral": 102,
+          "positive": 130
+        },
+        "no_lang_words": {
+          "negative": 0,
+          "neutral": 0,
+          "positive": 0
+        }
+      },
+      "chars": {
+        "count": 2367.0,
+        "mean": 98.7,
+        "std": 23.6,
+        "min": 5.0,
+        "50%": 107.0,
+        "95%": 126.0,
+        "max": 138.0
+      },
+      "words": {
+        "count": 2367.0,
+        "mean": 16.5,
+        "std": 5.3,
+        "min": 1.0,
+        "50%": 17.0,
+        "95%": 24.0,
+        "max": 35.0
+      },
+      "cmi_mean": 21.61,
+      "has_devanagari": 12,
+      "retweets": 353,
+      "truncated": 1259
+    },
+    "test": {
+      "n": 3000,
+      "labels": {
+        "negative": 900,
+        "neutral": 1100,
+        "positive": 1000
+      },
+      "mix_bucket": {
+        "mostly_hindi": 1189,
+        "code_mixed": 1431,
+        "mostly_english": 370,
+        "no_lang_words": 10
+      },
+      "mix_bucket_x_label": {
+        "mostly_hindi": {
+          "negative": 520,
+          "neutral": 426,
+          "positive": 243
+        },
+        "code_mixed": {
+          "negative": 343,
+          "neutral": 537,
+          "positive": 551
+        },
+        "mostly_english": {
+          "negative": 37,
+          "neutral": 127,
+          "positive": 206
+        },
+        "no_lang_words": {
+          "negative": 0,
+          "neutral": 10,
+          "positive": 0
+        }
+      },
+      "chars": {
+        "count": 3000.0,
+        "mean": 99.5,
+        "std": 23.7,
+        "min": 21.0,
+        "50%": 107.0,
+        "95%": 127.0,
+        "max": 140.0
+      },
+      "words": {
+        "count": 3000.0,
+        "mean": 16.6,
+        "std": 5.4,
+        "min": 0.0,
+        "50%": 18.0,
+        "95%": 24.0,
+        "max": 29.0
+      },
+      "cmi_mean": 21.23,
+      "has_devanagari": 14,
+      "retweets": 519,
+      "truncated": 1643
+    }
+  },
+  "test_flags": {
+    "no_content": 10,
+    "non_hinglish_language": 1,
+    "has_near_duplicate_in_test": 34
+  },
+  "youtube_ood": {
+    "raw_n": 3190,
+    "raw_labels": {
+      "negative": 1427,
+      "neutral": 770,
+      "positive": 993
+    },
+    "dropped": {
+      "duplicate": 18,
+      "duplicate_label_conflict": 4
+    },
+    "final_n": 3168,
+    "final_labels": {
+      "negative": 1419,
+      "neutral": 767,
+      "positive": 982
+    },
+    "videos": 23,
+    "chars": {
+      "count": 3168.0,
+      "mean": 72.0,
+      "std": 73.3,
+      "min": 11.0,
+      "50%": 51.0,
+      "95%": 187.6,
+      "max": 1483.0
+    }
+  }
+}

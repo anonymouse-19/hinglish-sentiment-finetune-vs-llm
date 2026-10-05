@@ -1,0 +1,285 @@
+{
+  "model": "tfidf_logreg",
+  "best_params": {
+    "features": "word+char",
+    "C": 0.3,
+    "class_weight": null
+  },
+  "train_size": 13409,
+  "splits": {
+    "val": {
+      "n": 2367,
+      "macro_f1": 0.6414675004193663,
+      "accuracy": 0.63709336713139,
+      "weighted_f1": 0.6375460053492726,
+      "n_invalid": 0,
+      "per_class": {
+        "negative": {
+          "precision": 0.6611111111111111,
+          "recall": 0.672316384180791,
+          "f1": 0.6666666666666666,
+          "support": 708
+        },
+        "neutral": {
+          "precision": 0.569060773480663,
+          "recall": 0.580608793686584,
+          "f1": 0.5747767857142857,
+          "support": 887
+        },
+        "positive": {
+          "precision": 0.6967654986522911,
+          "recall": 0.6696891191709845,
+          "f1": 0.6829590488771466,
+          "support": 772
+        }
+      },
+      "confusion_matrix": {
+        "labels_true": [
+          "negative",
+          "neutral",
+          "positive"
+        ],
+        "labels_pred": [
+          "negative",
+          "neutral",
+          "positive",
+          "invalid"
+        ],
+        "matrix": [
+          [
+            476,
+            194,
+            38,
+            0
+          ],
+          [
+            185,
+            515,
+            187,
+            0
+          ],
+          [
+            59,
+            196,
+            517,
+            0
+          ]
+        ]
+      },
+      "macro_f1_ci_low": 0.6214725991216823,
+      "macro_f1_ci_high": 0.6606277319088101,
+      "n_resamples": 1000,
+      "by_mix_bucket": {
+        "code_mixed": {
+          "n": 1137,
+          "macro_f1": 0.6254287336954415,
+          "accuracy": 0.633245382585752,
+          "label_share": {
+            "negative": 0.2436235708003518,
+            "neutral": 0.38786279683377306,
+            "positive": 0.3685136323658751
+          }
+        },
+        "mostly_english": {
+          "n": 258,
+          "macro_f1": 0.5839320029563932,
+          "accuracy": 0.627906976744186,
+          "label_share": {
+            "negative": 0.10077519379844961,
+            "neutral": 0.3953488372093023,
+            "positive": 0.5038759689922481
+          }
+        },
+        "mostly_hindi": {
+          "n": 972,
+          "macro_f1": 0.6283511400302579,
+          "accuracy": 0.6440329218106996,
+          "label_share": {
+            "negative": 0.4166666666666667,
+            "neutral": 0.35390946502057613,
+            "positive": 0.2294238683127572
+          }
+        }
+      }
+    },
+    "test": {
+      "n": 3000,
+      "macro_f1": 0.6868675278962816,
+      "accuracy": 0.682,
+      "weighted_f1": 0.6837392168817916,
+      "n_invalid": 0,
+      "per_class": {
+        "negative": {
+          "precision": 0.7274853801169591,
+          "recall": 0.6911111111111111,
+          "f1": 0.7088319088319088,
+          "support": 900
+        },
+        "neutral": {
+          "precision": 0.5903010033444817,
+          "recall": 0.6418181818181818,
+          "f1": 0.6149825783972126,
+          "support": 1100
+        },
+        "positive": {
+          "precision": 0.7565858798735511,
+          "recall": 0.718,
+          "f1": 0.736788096459723,
+          "support": 1000
+        }
+      },
+      "confusion_matrix": {
+        "labels_true": [
+          "negative",
+          "neutral",
+          "positive"
+        ],
+        "labels_pred": [
+          "negative",
+          "neutral",
+          "positive",
+          "invalid"
+        ],
+        "matrix": [
+          [
+            622,
+            242,
+            36,
+            0
+          ],
+          [
+            199,
+            706,
+            195,
+            0
+          ],
+          [
+            34,
+            248,
+            718,
+            0
+          ]
+        ]
+      },
+      "macro_f1_ci_low": 0.6693985131818045,
+      "macro_f1_ci_high": 0.7029753199387639,
+      "n_resamples": 1000,
+      "by_mix_bucket": {
+        "code_mixed": {
+          "n": 1431,
+          "macro_f1": 0.675335485404152,
+          "accuracy": 0.6792452830188679,
+          "label_share": {
+            "negative": 0.23969252271139063,
+            "neutral": 0.3752620545073375,
+            "positive": 0.38504542278127185
+          }
+        },
+        "mostly_english": {
+          "n": 370,
+          "macro_f1": 0.5199538227411328,
+          "accuracy": 0.6594594594594595,
+          "label_share": {
+            "negative": 0.1,
+            "neutral": 0.34324324324324323,
+            "positive": 0.5567567567567567
+          }
+        },
+        "mostly_hindi": {
+          "n": 1189,
+          "macro_f1": 0.677117179312087,
+          "accuracy": 0.6896551724137931,
+          "label_share": {
+            "negative": 0.4373423044575273,
+            "neutral": 0.3582842724978974,
+            "positive": 0.2043734230445753
+          }
+        },
+        "no_lang_words": {
+          "n": 10,
+          "macro_f1": 0.3333333333333333,
+          "accuracy": 1.0,
+          "label_share": {
+            "neutral": 1.0
+          }
+        }
+      }
+    },
+    "test_youtube": {
+      "n": 3168,
+      "macro_f1": 0.41134575519059063,
+      "accuracy": 0.411300505050505,
+      "weighted_f1": 0.401792560667127,
+      "n_invalid": 0,
+      "per_class": {
+        "negative": {
+          "precision": 0.7240618101545254,
+          "recall": 0.23114869626497533,
+          "f1": 0.3504273504273504,
+          "support": 1419
+        },
+        "neutral": {
+          "precision": 0.2859641451683428,
+          "recall": 0.8526727509778357,
+          "f1": 0.42829076620825146,
+          "support": 767
+        },
+        "positive": {
+          "precision": 0.75,
+          "recall": 0.3268839103869654,
+          "f1": 0.4553191489361702,
+          "support": 982
+        }
+      },
+      "confusion_matrix": {
+        "labels_true": [
+          "negative",
+          "neutral",
+          "positive"
+        ],
+        "labels_pred": [
+          "negative",
+          "neutral",
+          "positive",
+          "invalid"
+        ],
+        "matrix": [
+          [
+            328,
+            1022,
+            69,
+            0
+          ],
+          [
+            75,
+            654,
+            38,
+            0
+          ],
+          [
+            50,
+            611,
+            321,
+            0
+          ]
+        ]
+      },
+      "macro_f1_ci_low": 0.3934961415753722,
+      "macro_f1_ci_high": 0.4293117013867509,
+      "n_resamples": 1000
+    }
+  },
+  "serving": {
+    "latency_batch1_cpu": {
+      "n": 1000,
+      "p50_ms": 1.9049999536946416,
+      "p95_ms": 3.4984400786925094,
+      "mean_ms": 2.1268092987593263
+    },
+    "throughput_batch_full_test_per_s": 4858.425482025525,
+    "model_size_mb": 6.224692,
+    "n_features": 105265,
+    "n_parameters": 315798,
+    "hardware": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel (local CPU, single process)"
+  }
+}

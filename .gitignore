@@ -1,0 +1,29 @@
+# Data: SentiMix has no explicit licence, so raw and processed data are never committed.
+# Anyone can rebuild them with `python scripts/prepare_data.py`.
+data/
+
+# Environments & secrets
+.venv/
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Experiment tracking / training outputs
+wandb/
+mlruns/
+outputs/
+checkpoints/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

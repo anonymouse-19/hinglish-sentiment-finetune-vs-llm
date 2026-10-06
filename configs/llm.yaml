@@ -34,7 +34,8 @@ few_shot:
 client:
   requests_per_minute: 25            # client-side pacing, kept under the free tier's 30 RPM
   tokens_per_minute: 7000            # ... and under its 8K tokens/min (few-shot requests are ~650 tokens)
-  max_retries: 6                     # on 429 / 5xx / timeouts, with exponential backoff
+  max_retries: 6                     # on 429 / 5xx, with exponential backoff (capped at 60 s)
+  max_connection_retries: 12         # network drops / timeouts: ~9 min of retrying before giving up (C-015)
   timeout_s: 60
 
 eval:

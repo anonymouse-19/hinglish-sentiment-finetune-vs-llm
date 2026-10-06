@@ -40,6 +40,7 @@ Every non-trivial decision, including the ones the project owner made when answe
 | D-034 | 4 | Self-hosted cost/1k = AWS on-demand $/h ÷ measured batched throughput (g4dn.xlarge, c7i.large) |
 | D-035 | 4 | Headline on identical tweet IDs for every model, with a paired bootstrap of the macro-F1 difference |
 | D-036 | 4 | Error analysis: most-confident mistakes in every confusion cell; text stays out of git |
+| D-037 | 5 | Shipping: publish the best encoder from Colab; Space = encoder on CPU + Groq few-shot, code installed from GitHub |
 
 ---
 
@@ -503,3 +504,31 @@ Every non-trivial decision, including the ones the project owner made when answe
 - **Reasoning:** Confident mistakes are the most informative: either the model learned something wrong, or the gold label is questionable (C-010 showed many are). Covering every cell avoids a story told only about neutral.
 - **Trade-offs accepted:** Explanations are one person's judgement. Where the gold label itself looks wrong, we say so rather than inventing a model failure. The owner's blind relabelling of a sample would strengthen this (offered in Phase 4).
 - **Revisit if:** the owner relabels a sample. Then report the share of "model right, gold wrong" cases.
+
+---
+
+## Phase 5: Ship
+
+### D-037 — How the model and demo are shipped
+- **Date / phase:** 2026-10-06 · Phase 5 (prepared while Phases 2–4 wait on external runs)
+- **Context:** The brief asks for the model on the HF Hub with a proper card, and a Gradio demo on HF Spaces showing the fine-tuned model and the LLM side by side.
+- **Options considered:**
+  - Which model to publish and demo: **best encoder** · QLoRA adapter (it needs the 2B base model and, on a free CPU-only Space, can't use 4-bit bitsandbytes: ~8 GB fp32 and seconds per prediction) · both.
+  - Where to push from: download 1.1 GB from Drive and push locally · **push from Colab, where the weights already are**.
+  - How the Space gets the code: copy `prompts.py` and `client.py` into the Space (two copies to keep in sync) · **`pip install` the project package from GitHub in the Space's requirements**.
+  - The model card: hand-written · **generated from `reports/` (`ship/model_card.py`)**, refreshed locally once the LLM comparison is final (`publish.py card`).
+- **Decision:**
+  - Publish and demo the val-selected encoder; the QLoRA adapter stays in the study.
+  - The notebook's section 8 pushes the model from Colab, using an `HF_TOKEN` Colab secret.
+  - `config.demojize` is written into the uploaded config, so the demo and users apply the same preprocessing.
+  - The Space runs the encoder on CPU, plus Groq `gpt-oss-120b` with the *frozen few-shot prompt*. Its 9 example tweets go into the Space as `few_shot_examples.json` (not into git), and the Groq key is a Space secret.
+- **Reasoning:**
+  - The encoder is the model a team would actually deploy cheaply, and it fits a free CPU Space.
+  - Generated cards can't drift from the reported numbers.
+  - Installing from GitHub means the demo runs exactly the evaluated prompt, parser and cost code.
+- **Trade-offs accepted:**
+  - The demo's CPU latency is a shared free Space, not the T4 numbers in the table (labelled as such in the UI).
+  - The Space shares one Groq free-tier key, so heavy traffic hits rate limits; the UI reports failures gracefully.
+  - Publishing 9 training tweets in the Space is a small quotation, like the 10 in the error analysis (D-036).
+  - The Space depends on the GitHub repo staying public.
+- **Revisit if:** the QLoRA model wins clearly (then also publish the adapter, demoed via a GPU Space or a merged fp16 model), or the Groq key gets abused (then disable the LLM half and show cached example outputs).

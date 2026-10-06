@@ -68,6 +68,10 @@ python scripts/compare_baselines.py   # every model scored on the same tweet ids
 python scripts/evaluate_all.py     # tables A-D, headline, figures -> reports/evaluation/, reports/figures/
 python scripts/error_analysis.py   # confident mistakes per confusion cell -> outputs/ (quotes tweets; git-ignored)
 
+# Phase 5: ship (needs HF_TOKEN; add --dry-run to preview)
+python scripts/publish.py card  --repo-id <user>/hinglish-sentiment-xlmr
+python scripts/publish.py space --space-id <user>/hinglish-sentiment-demo --model-id <user>/hinglish-sentiment-xlmr
+
 # Phase 3: fine-tuning (GPU): open notebooks/phase3_finetune_colab.ipynb in Colab (T4), or locally:
 python scripts/finetune_sweep.py --family encoder --smoke   # tiny models, CPU, ~1 min pipeline check
 python scripts/finetune_sweep.py --family encoder           # XLM-R / MuRIL sweep (needs a GPU)

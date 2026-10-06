@@ -1,6 +1,6 @@
 # Project Context: Fine-Tuned Small Model vs Large LLM on Hinglish Sentiment
 
-> **Single source of truth.** Read this first at the start of every session. Last updated: **2026-10-06**. Phase 2: LLM test runs are in progress over the free tier's daily quota. Phase 3: ready for Colab (owner). Phase 4: evaluation tooling built and run on the results so far.
+> **Single source of truth.** Read this first at the start of every session. Last updated: **2026-10-06**. Phase 2: LLM test runs are in progress over the free tier's daily quota. Phase 3: ready for Colab (owner). Phase 4: evaluation tooling built and run on the results so far. Phase 5: publishing and demo tooling prepared.
 > Companion docs: [DECISION_LOG](DECISION_LOG.md) (why) · [CHALLENGES_LOG](CHALLENGES_LOG.md) (what went wrong) · [DATA_CARD](DATA_CARD.md) (the data in detail).
 
 ---
@@ -99,7 +99,7 @@ flowchart LR
 | **scipy** (`connected_components`) | Groups near-duplicate pairs into clusters |
 | **PyYAML** configs | Every threshold lives in `configs/*.yaml`, not in code, so decisions are explicit and reviewable |
 | **matplotlib** | Static figures for the data card and README |
-| **pytest** | 68 offline unit tests: data pipeline, metrics, prompt parsing, LLM client (fake API), sweep grids, demojize, cost and paired bootstrap |
+| **pytest** | 70 offline unit tests: data pipeline, metrics, prompt parsing, LLM client (fake API), sweep grids, demojize, cost, paired bootstrap, model card |
 | **PyTorch** | The deep-learning framework under everything; Colab's CUDA build on the T4, a CPU build locally for smoke tests |
 | **transformers 5 + HF Trainer** | Pre-trained models, tokenizers, and a tested training loop (fp16, evaluation each epoch, early stopping, best-checkpoint restore) |
 | **PEFT (LoRA) + bitsandbytes (4-bit)** | QLoRA: fine-tune a 2B decoder in a T4's 16 GB by freezing a 4-bit copy of the base and training ~1% extra weights |
@@ -140,6 +140,7 @@ flowchart LR
 │   ├── eval/metrics.py          macro-F1 & co., confusion matrix, bootstrap CI, per-bucket scores, latency p50/p95
 │   ├── eval/compare.py          load every model's results; self-hosted cost/1k; paired bootstrap; same-id alignment
 │   ├── baselines/tfidf.py       TF-IDF pipeline + out-of-fold label confidence
+│   ├── ship/model_card.py       generates the HF model card from reports/
 │   ├── finetune/
 │   │   ├── data.py              tokenized Dataset; optional emoji→text
 │   │   ├── modeling.py          encoder builder; 4-bit + LoRA decoder builder; parameter counts
@@ -158,8 +159,9 @@ flowchart LR
 │   ├── compare_baselines.py     Phase 2: scores every baseline on the same tweet ids → reports/baselines/comparison.json
 │   ├── finetune_sweep.py        Phase 3: resumable sweep → pick best on val → reload → test once (--smoke: tiny models on CPU)
 │   ├── evaluate_all.py          Phase 4: tables A–D, headline sentence, 3 figures → reports/evaluation/, reports/figures/
-│   └── error_analysis.py        Phase 4: confident mistakes per confusion cell → outputs/error_analysis_<model>.md
-├── tests/                       pytest suite (clean, data_pipeline, baselines, finetune, compare): 68 tests
+│   ├── error_analysis.py        Phase 4: confident mistakes per confusion cell → outputs/error_analysis_<model>.md
+│   └── publish.py               Phase 5: push model + card to the HF Hub; refresh card; deploy the Space (--dry-run)
+├── tests/                       pytest suite (clean, data_pipeline, baselines, finetune, compare, model_card): 70 tests
 ├── data/                        git-ignored: raw/ downloads, processed/ parquet splits + dropped.parquet
 ├── outputs/                     git-ignored: tfidf_lr/model.joblib, llm_cache/responses.jsonl, finetune*/ (smoke runs)
 ├── reports/
@@ -169,7 +171,9 @@ flowchart LR
 │   ├── finetune/                (from Colab) encoder/ and decoder/: sweep.csv, metrics.json, predictions_*.parquet
 │   └── evaluation/              summary.json + results.md (auto-generated comparison tables)
 ├── notebooks/
-│   └── phase3_finetune_colab.ipynb   Colab T4 notebook: clone → install → data → smoke → encoder sweep → QLoRA sweep → download reports
+│   └── phase3_finetune_colab.ipynb   Colab T4 notebook: clone → install → data → smoke → encoder sweep → QLoRA sweep → publish to Hub → download reports
+├── app/
+│   └── app.py                   Gradio side-by-side demo (fine-tuned encoder on CPU vs Groq LLM), deployed to HF Spaces
 └── docs/
     ├── PROJECT_CONTEXT.md       ← you are here
     ├── DECISION_LOG.md          ADR-style decisions D-001 …
@@ -250,6 +254,17 @@ flowchart LR
 - **Cost for self-hosted models (`configs/cost.yaml`).** Rent the machine the model was timed on (AWS T4 instance $0.526/h, small CPU instance $0.089/h), keep it busy at the measured throughput, and divide: $/h ÷ predictions per hour × 1,000.
 - **Error analysis (`scripts/error_analysis.py`).** Lists a model's most confident mistakes in every true→predicted cell, with what every other model said. It writes to git-ignored `outputs/` because it quotes tweets. The 10 explained examples for the docs are picked from it.
 
+*Phase 5: ship (prepared)*
+
+- **Model card (`ship/model_card.py`).** Builds the Hub README (metadata, results with CIs, language-mix table, LLM comparison, usage code, training details, limitations) straight from the result files, so it can't disagree with them.
+- **Publishing (`scripts/publish.py`).** Three steps:
+  1. `model`: run on Colab, where the weights are. Uploads the best encoder plus its card, and records `demojize` in the model config.
+  2. `card`: run locally after the final evaluation. Re-uploads only the card, now including the LLM comparison.
+  3. `space`: deploys the demo, setting the model ID as a Space variable and the Groq key as a Space secret.
+
+  `--dry-run` stages everything in `outputs/publish_preview/` for review.
+- **Demo (`app/app.py`).** One text box. The tweet goes to the fine-tuned encoder on the Space's CPU (class probabilities and latency) and to gpt-oss-120b on Groq with the study's frozen few-shot prompt (answer, latency, tokens, cost). The Space installs this repo from GitHub, so it runs the same prompt, parser and cost code as the evaluation.
+
 ## 9. Key results so far
 
 **Phase 1 (data)**
@@ -287,13 +302,15 @@ flowchart LR
 
 ## 10. Current status and next steps
 
-**Status:** Phases 2–4 are running in parallel (owner's call). External runs are the bottleneck, not code.
+**Status:** Phases 2–5 are being prepared in parallel (owner's call). External runs (LLM quota, Colab) are the bottleneck, not code.
 
 *Phase 2 (Baselines):* 🟡 TF-IDF ✅ · LLM val ✅ (prompts frozen, D-025) · LLM test (600) + YouTube (300) ⏳. `python scripts/run_llm_all.py` resumes the queue. The quota is a rolling 24 h window (D-023 update).
 
 *Phase 3 (Fine-tuning):* 🟡 code complete and pushed to GitHub (`anonymouse-19/hinglish-sentiment-finetune-vs-llm`). Waiting on the Colab run.
 
-*Phase 4 (Evaluation):* 🟡 harness built and tested (68 tests) and run on the results so far: tables, paired bootstrap, cost model, 3 figures, error-analysis tool. To finish once all results are in: re-run `evaluate_all.py`, write the 10 explained errors, and write the robustness analysis.
+*Phase 4 (Evaluation):* 🟡 harness built and tested and run on the results so far: tables, paired bootstrap, cost model, 3 figures, error-analysis tool. To finish once all results are in: re-run `evaluate_all.py`, write the 10 explained errors, and write the robustness analysis.
+
+*Phase 5 (Ship):* 🟡 prepared: model-card generator, `publish.py` (model / card / space, dry-run tested), Gradio app (tested headlessly with a real Groq call), and a Hub-push section in the Colab notebook. Still to do after results: README final pass, a LICENSE (owner's choice), `INTERVIEW_PREP.md`, and the actual Hub and Space deployment.
 
 **Owner actions to unblock Phase 3**
 1. Create an empty public GitHub repo and push (commands in the session summary). Put its URL in the notebook's first cell.
@@ -302,7 +319,7 @@ flowchart LR
 
 **Then:** analyse the sweeps (MuRIL raw vs demojized, encoder vs QLoRA, learning-rate sensitivity), fill in the tables, and close Phases 2 and 3 with the end-of-phase docs and the difficulties question.
 
-**Open questions for later phases:** an HF Hub username for publishing (Phase 5).
+**Open questions for later phases:** the Hugging Face username (the notebook assumes `anonymouse-19`); a licence for the repo code (MIT suggested).
 
 ## 11. Glossary
 

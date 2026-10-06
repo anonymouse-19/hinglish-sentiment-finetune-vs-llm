@@ -18,6 +18,7 @@ Only real difficulties that actually happened, each with a STAR version for inte
 | C-012 | 3 | Mixed-precision dtype mismatch in the QLoRA classifier, caught by a CPU smoke test |
 | C-013 | 3 | Installing transformers silently downgraded a pinned library |
 | C-014 | 3 | *(owner)* First GitHub push failed: placeholder URL saved as the remote |
+| C-015 | 2 | A network outage stopped the LLM run, and the batch script blamed the quota |
 
 ---
 
@@ -268,3 +269,19 @@ Only real difficulties that actually happened, each with a STAR version for inte
   - *A:* I found the remote had been saved with a placeholder URL, and that `remote add` won't overwrite an existing remote. I inspected it with `git remote -v` and corrected it with `git remote set-url`.
   - *R:* The push succeeded, and I now understand how git remotes are stored and changed.
 
+### C-015 — A network outage stopped the LLM run, and the batch script blamed the quota
+- **Phase:** 2 (Baselines), found while building Phase 4–5 tooling
+- **What happened:** During the second day's LLM batch, requests started failing with `APIConnectionError: Connection error.` The client retried 6 times (backoff up to 60 s, about 2 minutes in total), gave up at request 130/600, and `run_llm_all.py` printed **"Daily quota reached… run again tomorrow"**. At the same moment, `pip install gradio` failed with an SSL error: *"certificate is not within its validity period when verifying against the current system clock"*.
+- **Root cause:** A temporary loss of connectivity on the owner's machine, lasting a few minutes. Checked afterwards: Groq, PyPI and the Hub all returned HTTP 200, the system clock was correct, and PyPI's certificate was valid until Jan 2027. Two code issues made it worse:
+  1. Connection errors had the same short retry budget as rate limits, though outages last minutes.
+  2. The batch script treated *any* early stop as "quota reached", which was wrong advice: it would have made the owner wait a day for nothing.
+- **What was tried:** Checked each endpoint with `curl` and the certificate dates with `openssl s_client` to rule out a clock or certificate problem, then re-ran the install and the batch (both succeeded; the batch resumed from the cache at 130).
+- **Final fix:**
+  1. Separate retry budgets: `max_connection_retries: 12` (~9 minutes) for network errors and timeouts, 6 for 429/5xx.
+  2. `run_llm_all.py` reads the recorded stop reason: a quota stop says "wait ~24 h"; anything else says "check the connection and re-run now".
+- **Lesson learned:** Error messages are part of the design. A wrong diagnosis in a log costs more time than the original failure. Classify failures (quota vs network vs server) and give each its own retry policy and its own advice.
+- **STAR:**
+  - *S:* My overnight-style LLM evaluation job stopped partway and told me the daily quota was exhausted.
+  - *T:* Find out whether that was true before losing a day waiting.
+  - *A:* I checked the logs (connection errors, not 429s), then verified connectivity, certificates and the system clock with curl and openssl. I found a brief network outage, gave network errors a longer retry budget than rate limits, and made the script report the real stop reason.
+  - *R:* The run resumed immediately from its cache with no lost work, and future failures are diagnosed correctly by the tool itself.

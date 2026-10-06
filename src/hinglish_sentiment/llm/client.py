@@ -89,6 +89,8 @@ class LLMClient:
         self.tokens_per_minute = cfg["client"].get("tokens_per_minute")  # None = no token pacing
         self._recent: deque[tuple[float, int]] = deque()  # (time, tokens) of calls in the last 60 s
         self.max_retries = cfg["client"]["max_retries"]
+        # network outages last minutes, not seconds: connection errors get a longer retry budget
+        self.max_connection_retries = cfg["client"].get("max_connection_retries", self.max_retries)
         self.cache = cache
         # max_retries=0: we retry ourselves so every attempt and wait is visible in the logs
         self.sdk = sdk_client or openai.OpenAI(api_key=api_key, base_url=cfg["base_url"],
@@ -116,14 +118,15 @@ class LLMClient:
         if self.cache is not None and (hit := self.cache.get(key)) is not None:
             return LLMResponse(**{**hit, "from_cache": True})
 
-        for attempt in range(1, self.max_retries + 2):
+        for attempt in range(1, max(self.max_retries, self.max_connection_retries) + 2):
             self._pace()
             start = time.perf_counter()
             try:
                 resp = self.sdk.chat.completions.create(model=self.model, messages=messages,
                                                         extra_body=self.extra_body or None, **self.params)
             except RETRYABLE as exc:
-                if attempt > self.max_retries:
+                is_network = isinstance(exc, (openai.APIConnectionError, openai.APITimeoutError))
+                if attempt > (self.max_connection_retries if is_network else self.max_retries):
                     raise
                 retry_after = _retry_after_seconds(exc)
                 if retry_after is not None and retry_after > 600:

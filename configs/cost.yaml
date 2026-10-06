@@ -1,0 +1,26 @@
+# Phase 4: how "cost per 1,000 predictions" is computed for self-hosted models (DECISION_LOG D-034).
+# LLM API cost comes from billed tokens x list price (configs/llm.yaml, D-022).
+# Self-hosted cost = instance $/hour / (measured predictions per second x 3600) x 1000,
+# i.e. a machine kept busy with batched requests. Prices: AWS us-east-1, on-demand, Linux.
+as_of: "2026-10-06"
+hardware:
+  gpu_t4:
+    instance: g4dn.xlarge (1x NVIDIA T4, 4 vCPU, 16 GiB)
+    usd_per_hour: 0.526
+    source: "calculator.holori.com/aws/ec2/g4dn.xlarge/us-east-1 (updated 2026-07-16)"
+  cpu_small:
+    instance: c7i.large (2 vCPU, 4 GiB)
+    usd_per_hour: 0.0892
+    source: "calculator.holori.com/aws/ec2/c7i.large/us-east-1"
+
+# Which hardware each model family is costed on (where its throughput was measured).
+model_hardware:
+  tfidf: cpu_small      # throughput measured on the owner's laptop CPU, single process (stated as a caveat)
+  encoder: gpu_t4       # measured on the Colab T4, fp16, batch 64
+  decoder: gpu_t4       # measured on the Colab T4, 4-bit + fp16 autocast, batch 64
+
+paths:
+  baselines_dir: reports/baselines
+  finetune_dir: reports/finetune
+  out_dir: reports/evaluation
+  figures_dir: reports/figures

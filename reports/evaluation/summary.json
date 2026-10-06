@@ -1,0 +1,325 @@
+{
+  "cost_assumptions": {
+    "as_of": "2026-10-06",
+    "hardware": {
+      "gpu_t4": {
+        "instance": "g4dn.xlarge (1x NVIDIA T4, 4 vCPU, 16 GiB)",
+        "usd_per_hour": 0.526,
+        "source": "calculator.holori.com/aws/ec2/g4dn.xlarge/us-east-1 (updated 2026-07-16)"
+      },
+      "cpu_small": {
+        "instance": "c7i.large (2 vCPU, 4 GiB)",
+        "usd_per_hour": 0.0892,
+        "source": "calculator.holori.com/aws/ec2/c7i.large/us-east-1"
+      }
+    },
+    "model_hardware": {
+      "tfidf": "cpu_small",
+      "encoder": "gpu_t4",
+      "decoder": "gpu_t4"
+    },
+    "paths": {
+      "baselines_dir": "reports/baselines",
+      "finetune_dir": "reports/finetune",
+      "out_dir": "reports/evaluation",
+      "figures_dir": "reports/figures"
+    }
+  },
+  "tables": {
+    "headline": {
+      "split": "val",
+      "n": 200,
+      "complete": true,
+      "rows": [
+        {
+          "key": "tfidf",
+          "name": "TF-IDF + LogReg",
+          "family": "classical",
+          "n": 200,
+          "macro_f1": 0.6876377504553735,
+          "macro_f1_ci_low": 0.6188319658909319,
+          "macro_f1_ci_high": 0.74649155201439,
+          "n_resamples": 1000,
+          "accuracy": 0.685,
+          "n_invalid": 0,
+          "f1_per_class": {
+            "negative": 0.671875,
+            "neutral": 0.6533333333333333,
+            "positive": 0.7377049180327869
+          },
+          "confusion": [
+            [
+              43,
+              15,
+              2,
+              0
+            ],
+            [
+              16,
+              49,
+              10,
+              0
+            ],
+            [
+              9,
+              11,
+              45,
+              0
+            ]
+          ],
+          "p50_ms": 1.9049999536946416,
+          "latency_basis": "laptop CPU, batch 1",
+          "usd_per_1k": 5.099960443861266e-06,
+          "cost_basis": "c7i.large (2 vCPU, 4 GiB) @ $0.0892/h, laptop-measured throughput",
+          "params": "316k",
+          "size": "6 MB",
+          "complete": true
+        },
+        {
+          "key": "llm_few",
+          "name": "gpt-oss-120b few-shot",
+          "family": "llm",
+          "n": 200,
+          "macro_f1": 0.673826412619516,
+          "macro_f1_ci_low": 0.6080416971517881,
+          "macro_f1_ci_high": 0.7314155108512544,
+          "n_resamples": 1000,
+          "accuracy": 0.685,
+          "n_invalid": 0,
+          "f1_per_class": {
+            "negative": 0.7448275862068966,
+            "neutral": 0.5405405405405406,
+            "positive": 0.7361111111111112
+          },
+          "confusion": [
+            [
+              54,
+              2,
+              4,
+              0
+            ],
+            [
+              23,
+              30,
+              22,
+              0
+            ],
+            [
+              8,
+              4,
+              53,
+              0
+            ]
+          ],
+          "p50_ms": 888.7189499801025,
+          "latency_basis": "groq API, incl. network",
+          "usd_per_1k": 0.10140074999999998,
+          "cost_basis": "billed tokens x list price (2026-10-05)",
+          "params": "117B (MoE, 5.1B active)",
+          "size": "hosted",
+          "complete": true
+        },
+        {
+          "key": "llm_zero",
+          "name": "gpt-oss-120b zero-shot",
+          "family": "llm",
+          "n": 200,
+          "macro_f1": 0.6018518518518517,
+          "macro_f1_ci_low": 0.5313581610353042,
+          "macro_f1_ci_high": 0.6643136668224771,
+          "n_resamples": 1000,
+          "accuracy": 0.63,
+          "n_invalid": 0,
+          "f1_per_class": {
+            "negative": 0.6875,
+            "neutral": 0.3958333333333333,
+            "positive": 0.7222222222222222
+          },
+          "confusion": [
+            [
+              55,
+              1,
+              4,
+              0
+            ],
+            [
+              33,
+              19,
+              23,
+              0
+            ],
+            [
+              12,
+              1,
+              52,
+              0
+            ]
+          ],
+          "p50_ms": 778.8942500483245,
+          "latency_basis": "groq API, incl. network",
+          "usd_per_1k": 0.06999075,
+          "cost_basis": "billed tokens x list price (2026-10-05)",
+          "params": "117B (MoE, 5.1B active)",
+          "size": "hosted",
+          "complete": true
+        }
+      ]
+    },
+    "full_test": {
+      "n": 3000,
+      "rows": [
+        {
+          "key": "tfidf",
+          "name": "TF-IDF + LogReg",
+          "family": "classical",
+          "n": 3000,
+          "macro_f1": 0.6868675278962816,
+          "macro_f1_ci_low": 0.6693985131818045,
+          "macro_f1_ci_high": 0.7029753199387639,
+          "n_resamples": 1000,
+          "accuracy": 0.682,
+          "n_invalid": 0,
+          "f1_per_class": {
+            "negative": 0.7088319088319088,
+            "neutral": 0.6149825783972126,
+            "positive": 0.736788096459723
+          },
+          "confusion": [
+            [
+              622,
+              242,
+              36,
+              0
+            ],
+            [
+              199,
+              706,
+              195,
+              0
+            ],
+            [
+              34,
+              248,
+              718,
+              0
+            ]
+          ],
+          "p50_ms": 1.9049999536946416,
+          "latency_basis": "laptop CPU, batch 1",
+          "usd_per_1k": 5.099960443861266e-06,
+          "cost_basis": "c7i.large (2 vCPU, 4 GiB) @ $0.0892/h, laptop-measured throughput",
+          "params": "316k",
+          "size": "6 MB",
+          "complete": true
+        }
+      ]
+    },
+    "robustness": {
+      "by_mix_bucket": {
+        "tfidf": {
+          "code_mixed": {
+            "n": 96,
+            "macro_f1": 0.6361967264346263
+          },
+          "mostly_hindi": {
+            "n": 82,
+            "macro_f1": 0.6891733413179629
+          },
+          "mostly_english": {
+            "n": 22,
+            "macro_f1": 0.5995423340961098
+          }
+        },
+        "llm_few": {
+          "code_mixed": {
+            "n": 96,
+            "macro_f1": 0.7223665223665222
+          },
+          "mostly_hindi": {
+            "n": 82,
+            "macro_f1": 0.6075396825396825
+          },
+          "mostly_english": {
+            "n": 22,
+            "macro_f1": 0.5428571428571428
+          }
+        },
+        "llm_zero": {
+          "code_mixed": {
+            "n": 96,
+            "macro_f1": 0.6264668664668664
+          },
+          "mostly_hindi": {
+            "n": 82,
+            "macro_f1": 0.5268576616891224
+          },
+          "mostly_english": {
+            "n": 22,
+            "macro_f1": 0.6427350427350428
+          }
+        }
+      },
+      "youtube": {
+        "n": 3168,
+        "complete": true,
+        "rows": [
+          {
+            "key": "tfidf",
+            "name": "TF-IDF + LogReg",
+            "family": "classical",
+            "n": 3168,
+            "macro_f1": 0.41134575519059063,
+            "macro_f1_ci_low": 0.3934961415753722,
+            "macro_f1_ci_high": 0.4293117013867509,
+            "n_resamples": 1000,
+            "accuracy": 0.411300505050505,
+            "n_invalid": 0,
+            "f1_per_class": {
+              "negative": 0.3504273504273504,
+              "neutral": 0.42829076620825146,
+              "positive": 0.4553191489361702
+            },
+            "confusion": [
+              [
+                328,
+                1022,
+                69,
+                0
+              ],
+              [
+                75,
+                654,
+                38,
+                0
+              ],
+              [
+                50,
+                611,
+                321,
+                0
+              ]
+            ],
+            "p50_ms": 1.9049999536946416,
+            "latency_basis": "laptop CPU, batch 1",
+            "usd_per_1k": 5.099960443861266e-06,
+            "cost_basis": "c7i.large (2 vCPU, 4 GiB) @ $0.0892/h, laptop-measured throughput",
+            "params": "316k",
+            "size": "6 MB",
+            "complete": true
+          }
+        ]
+      }
+    },
+    "paired": [
+      {
+        "a": "llm_few",
+        "b": "tfidf",
+        "diff": -0.013811337835857418,
+        "ci_low": -0.08364364575265257,
+        "ci_high": 0.05478708290237309,
+        "p_a_not_better": 0.64,
+        "n": 200
+      }
+    ]
+  }
+}

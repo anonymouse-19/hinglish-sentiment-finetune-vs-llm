@@ -1,6 +1,6 @@
 # Project Context: Fine-Tuned Small Model vs Large LLM on Hinglish Sentiment
 
-> **Single source of truth.** Read this first at the start of every session. Last updated: **2026-10-06**. Phase 2: LLM test/YouTube runs are spread over the free tier's daily quota. Phase 3: code, notebook and smoke tests ready; the Colab runs are next (owner).
+> **Single source of truth.** Read this first at the start of every session. Last updated: **2026-10-06**. Phase 2: LLM test runs are in progress over the free tier's daily quota. Phase 3: ready for Colab (owner). Phase 4: evaluation tooling built and run on the results so far.
 > Companion docs: [DECISION_LOG](DECISION_LOG.md) (why) · [CHALLENGES_LOG](CHALLENGES_LOG.md) (what went wrong) · [DATA_CARD](DATA_CARD.md) (the data in detail).
 
 ---
@@ -99,7 +99,7 @@ flowchart LR
 | **scipy** (`connected_components`) | Groups near-duplicate pairs into clusters |
 | **PyYAML** configs | Every threshold lives in `configs/*.yaml`, not in code, so decisions are explicit and reviewable |
 | **matplotlib** | Static figures for the data card and README |
-| **pytest** | 65 offline unit tests: parser, cleaner, dedupe, splitter, metrics, prompt parsing, LLM client (fake API), sweep grids, demojize |
+| **pytest** | 68 offline unit tests: data pipeline, metrics, prompt parsing, LLM client (fake API), sweep grids, demojize, cost and paired bootstrap |
 | **PyTorch** | The deep-learning framework under everything; Colab's CUDA build on the T4, a CPU build locally for smoke tests |
 | **transformers 5 + HF Trainer** | Pre-trained models, tokenizers, and a tested training loop (fp16, evaluation each epoch, early stopping, best-checkpoint restore) |
 | **PEFT (LoRA) + bitsandbytes (4-bit)** | QLoRA: fine-tune a 2B decoder in a T4's 16 GB by freezing a 4-bit copy of the base and training ~1% extra weights |
@@ -125,6 +125,7 @@ flowchart LR
 │   ├── data.yaml                every data-pipeline threshold (pinned revisions, dedupe, filters, split)
 │   ├── tfidf.yaml               TF-IDF grid + latency settings
 │   ├── finetune.yaml            pinned model revisions, encoder + QLoRA grids, training settings, smoke-test models
+│   ├── cost.yaml                Phase 4 hardware prices (AWS, dated) used for self-hosted cost per 1k
 │   ├── llm.yaml                 provider, model, dated prices, generation params, pacing, eval subset sizes
 │   └── few_shot_ids.yaml        the 9 few-shot train ids (generated; ids only, no tweet text)
 ├── src/hinglish_sentiment/      the reusable library code
@@ -137,6 +138,7 @@ flowchart LR
 │       ├── split.py             language-mix buckets, stratified split, stratified subsets
 │       └── youtube.py           out-of-domain YouTube loader
 │   ├── eval/metrics.py          macro-F1 & co., confusion matrix, bootstrap CI, per-bucket scores, latency p50/p95
+│   ├── eval/compare.py          load every model's results; self-hosted cost/1k; paired bootstrap; same-id alignment
 │   ├── baselines/tfidf.py       TF-IDF pipeline + out-of-fold label confidence
 │   ├── finetune/
 │   │   ├── data.py              tokenized Dataset; optional emoji→text
@@ -154,15 +156,18 @@ flowchart LR
 │   ├── run_llm_baseline.py      Phase 2: zero-/few-shot LLM on a split (resumable via cache; --dry-run)
 │   ├── run_llm_all.py           Phase 2: runs all 6 LLM runs in order; re-run daily until complete
 │   ├── compare_baselines.py     Phase 2: scores every baseline on the same tweet ids → reports/baselines/comparison.json
-│   └── finetune_sweep.py        Phase 3: resumable sweep → pick best on val → reload → test once (--smoke: tiny models on CPU)
-├── tests/                       pytest suite (test_clean, test_data_pipeline, test_baselines, test_finetune): 65 tests
+│   ├── finetune_sweep.py        Phase 3: resumable sweep → pick best on val → reload → test once (--smoke: tiny models on CPU)
+│   ├── evaluate_all.py          Phase 4: tables A–D, headline sentence, 3 figures → reports/evaluation/, reports/figures/
+│   └── error_analysis.py        Phase 4: confident mistakes per confusion cell → outputs/error_analysis_<model>.md
+├── tests/                       pytest suite (clean, data_pipeline, baselines, finetune, compare): 68 tests
 ├── data/                        git-ignored: raw/ downloads, processed/ parquet splits + dropped.parquet
 ├── outputs/                     git-ignored: tfidf_lr/model.joblib, llm_cache/responses.jsonl, finetune*/ (smoke runs)
 ├── reports/
 │   ├── data_stats.json          every number quoted in the data card
 │   ├── figures/                 label_distribution.png, mix_bucket_labels.png, cleaning_drops.png
 │   ├── baselines/               tfidf/{metrics.json, sweep.csv, predictions_*.parquet}; llm/<model>_<mode>_<split>/
-│   └── finetune/                (from Colab) encoder/ and decoder/: sweep.csv, metrics.json, predictions_*.parquet
+│   ├── finetune/                (from Colab) encoder/ and decoder/: sweep.csv, metrics.json, predictions_*.parquet
+│   └── evaluation/              summary.json + results.md (auto-generated comparison tables)
 ├── notebooks/
 │   └── phase3_finetune_colab.ipynb   Colab T4 notebook: clone → install → data → smoke → encoder sweep → QLoRA sweep → download reports
 └── docs/
@@ -233,6 +238,18 @@ flowchart LR
 - **Smoke mode (`--smoke`).** The same code with tiny random models and 64 tweets on the laptop CPU (~1 min). It already caught one real bug (C-012) before any GPU time was spent.
 - **Colab notebook.** Clones the GitHub repo, installs pinned libraries, reads the W&B key from Colab secrets, rebuilds the data (it is never committed), runs a smoke check, runs both sweeps writing to Google Drive, and downloads a zip of `reports/finetune/` to bring home.
 
+*Phase 4: evaluation*
+
+- **One comparison harness (`eval/compare.py`, `scripts/evaluate_all.py`).** Loads every model's saved predictions and serving numbers, whatever exists so far, and puts them on one footing:
+  - **Table A:** every model on the *same* tweets (the LLM's 600-tweet test subset).
+  - **Table B:** self-hosted models on all 3,000 test tweets.
+  - **Table C:** scores per language-mix bucket and on YouTube.
+  - **Table D:** paired bootstrap. Resample the same tweets 2,000 times, score two models on each resample, and look at the spread of the *difference*.
+
+  It also computes the headline sentence and draws three figures: accuracy vs cost (log scale), robustness dot plot, and confusion matrices. Re-run it as more results arrive.
+- **Cost for self-hosted models (`configs/cost.yaml`).** Rent the machine the model was timed on (AWS T4 instance $0.526/h, small CPU instance $0.089/h), keep it busy at the measured throughput, and divide: $/h ÷ predictions per hour × 1,000.
+- **Error analysis (`scripts/error_analysis.py`).** Lists a model's most confident mistakes in every true→predicted cell, with what every other model said. It writes to git-ignored `outputs/` because it quotes tweets. The 10 explained examples for the docs are picked from it.
+
 ## 9. Key results so far
 
 **Phase 1 (data)**
@@ -270,14 +287,13 @@ flowchart LR
 
 ## 10. Current status and next steps
 
-**Status:** Phase 2 and Phase 3 are running in parallel (owner's call: start Phase 3 while the LLM quota trickles in).
+**Status:** Phases 2–4 are running in parallel (owner's call). External runs are the bottleneck, not code.
 
-*Phase 2 (Baselines):* 🟡 TF-IDF ✅ · LLM val ✅ (prompts frozen, D-025) · LLM test (600) + YouTube (300) ⏳. Run `python scripts/run_llm_all.py` once a day until "All runs complete" (≈ 4–5 days, D-023).
+*Phase 2 (Baselines):* 🟡 TF-IDF ✅ · LLM val ✅ (prompts frozen, D-025) · LLM test (600) + YouTube (300) ⏳. `python scripts/run_llm_all.py` resumes the queue. The quota is a rolling 24 h window (D-023 update).
 
-*Phase 3 (Fine-tuning):* 🟡 code complete.
-- Encoder and QLoRA pipelines are smoke-tested on CPU, including save → reload → predict and an exact head-reload check.
-- 65 tests pass. Phase 1 data re-verified after the dependency change (C-013).
-- The Colab notebook is ready, and the local git repo is initialised with a first commit.
+*Phase 3 (Fine-tuning):* 🟡 code complete and pushed to GitHub (`anonymouse-19/hinglish-sentiment-finetune-vs-llm`). Waiting on the Colab run.
+
+*Phase 4 (Evaluation):* 🟡 harness built and tested (68 tests) and run on the results so far: tables, paired bootstrap, cost model, 3 figures, error-analysis tool. To finish once all results are in: re-run `evaluate_all.py`, write the 10 explained errors, and write the robustness analysis.
 
 **Owner actions to unblock Phase 3**
 1. Create an empty public GitHub repo and push (commands in the session summary). Put its URL in the notebook's first cell.
@@ -286,7 +302,7 @@ flowchart LR
 
 **Then:** analyse the sweeps (MuRIL raw vs demojized, encoder vs QLoRA, learning-rate sensitivity), fill in the tables, and close Phases 2 and 3 with the end-of-phase docs and the difficulties question.
 
-**Open questions for later phases:** an HF Hub username for publishing (Phase 5); the GPU/CPU hourly price assumption for local-model cost per 1k (Phase 4).
+**Open questions for later phases:** an HF Hub username for publishing (Phase 5).
 
 ## 11. Glossary
 
@@ -348,5 +364,10 @@ flowchart LR
 | **Gradient checkpointing** | Recompute activations in the backward pass instead of storing them: less memory, ~30% slower |
 | **Tokenizer vocabulary / [UNK]** | The fixed set of pieces a model can read; anything outside becomes the unknown token [UNK] and its information is lost |
 | **Demojize** | Replace each emoji with its text name, e.g. 😂 → `:face_with_tears_of_joy:` |
+| **Paired bootstrap** | Resample the same test items many times, score *both* models on each resample, and look at the spread of their difference; more sensitive than comparing two separate CIs |
+| **Throughput** | Predictions per second when requests are batched; drives self-hosted cost |
+| **On-demand price** | Pay-by-the-hour cloud price with no commitment (spot/reserved are cheaper) |
+| **Mixture-of-Experts (MoE)** | A model whose layers contain many "expert" sub-networks with only a few active per token; gpt-oss-120b has 117B parameters but uses ~5.1B per token |
+| **Row-normalised confusion matrix** | Each true-class row divided by its total, so the diagonal shows recall per class |
 | **Smoke test** | A tiny, fast end-to-end run that checks the plumbing works, not the quality |
 | **Hyperparameter sweep / grid** | Training several configurations (here every combination in a small grid) and picking the best on validation |

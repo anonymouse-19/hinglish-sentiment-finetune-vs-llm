@@ -37,6 +37,9 @@ Every non-trivial decision, including the ones the project owner made when answe
 | D-031 | 3 | Decoder classifies through a classification head + QLoRA, not by generating the label |
 | D-032 | 3 | Sweep: 9 encoder + 4 decoder runs, early stopping on val, winner reloaded and tested once |
 | D-033 | 3 | Serving measurements: batch-1 p50 incl. tokenization on T4, throughput, three size measures |
+| D-034 | 4 | Self-hosted cost/1k = AWS on-demand $/h ÷ measured batched throughput (g4dn.xlarge, c7i.large) |
+| D-035 | 4 | Headline on identical tweet IDs for every model, with a paired bootstrap of the macro-F1 difference |
+| D-036 | 4 | Error analysis: most-confident mistakes in every confusion cell; text stays out of git |
 
 ---
 
@@ -316,6 +319,7 @@ Every non-trivial decision, including the ones the project owner made when answe
   - Calendar time: about 5 days.
   - Cost per 1k is still computed from list prices (D-022), as if we were paying.
 - **Revisit if:** the subset CI is too wide to support the headline claim. Then extend the test subset over more free days (the cache keeps earlier answers), or spend about $1 on the paid tier.
+- **Update 2026-10-06:** the daily token limit behaves as a rolling 24-hour window, not a calendar day. Quota spent at ~02:00 was usable again by ~15:30, so runs can be scheduled roughly every 24 h after the previous one.
 
 ### D-024 — Report 95% bootstrap confidence intervals for macro-F1
 - **Date / phase:** 2026-10-05 · Phase 2
@@ -449,3 +453,53 @@ Every non-trivial decision, including the ones the project owner made when answe
 - **Reasoning:** It mirrors what an API client experiences (minus the network), and it separates "what you download" from "what must fit in memory".
 - **Trade-offs accepted:** Colab T4s are shared and timings vary between sessions. The LLM latency includes a network round-trip; the local models' latency does not (stated next to the table).
 - **Revisit if:** timings vary more than about 20% between sessions. Then report the median of several timing passes.
+
+---
+
+## Phase 4: Evaluation
+
+### D-034 — Cost per 1k predictions for self-hosted models: cloud instance price ÷ measured throughput
+- **Date / phase:** 2026-10-06 · Phase 4
+- **Context:** LLM cost comes from billed tokens (D-022). Self-hosted models have no per-call bill, so the "Y× cheaper" headline needs an equivalent.
+- **Options considered:**
+  1. **On-demand cloud price of the hardware the model was timed on ÷ measured batched throughput**: a machine kept busy.
+  2. Price × batch-1 latency: assumes one request at a time on a dedicated machine. That is far more expensive per prediction, and nobody serves at volume that way.
+  3. Zero, because "it's my laptop": not a fair comparison.
+  4. Serverless GPU pricing (per second): varies a lot by vendor and includes cold starts.
+- **Decision:** Option 1, with AWS us-east-1 on-demand prices as of 2026-10-06 in `configs/cost.yaml`:
+  - **g4dn.xlarge** (1× T4, the GPU the fine-tuned models are timed on): $0.526/h;
+  - **c7i.large** (2 vCPU): $0.0892/h, for TF-IDF.
+
+  Cost per 1k = $/h ÷ (predictions/s × 3600) × 1000.
+- **Reasoning:** One provider and one pricing model for all self-hosted rows. Throughput at batch 64 reflects how a classifier serves real traffic (micro-batching).
+- **Trade-offs accepted:**
+  - It assumes full utilisation; at low traffic an idle GPU still costs money, and the LLM API doesn't.
+  - TF-IDF throughput was measured on the owner's laptop, not on a c7i.large.
+  - Spot instances or reserved pricing would be 2–3× cheaper.
+
+  The README states the assumption, and the cost *ratio* spans several orders of magnitude, so none of these change the conclusion.
+- **Revisit if:** the fine-tuned and LLM costs come within ~10× of each other. Then model utilisation explicitly (cost at e.g. 10% load).
+
+### D-035 — Headline comparison on identical tweets, with a paired bootstrap
+- **Date / phase:** 2026-10-06 · Phase 4
+- **Context:** The LLM is scored on a 600-tweet stratified subset of test (D-023), the local models on all 3,000. Comparing numbers from different samples would mix model differences with sample differences.
+- **Options considered:**
+  - Sample: compare each model on its own sample · **restrict every model to the LLM's exact tweet IDs for the headline** (and report local models on the full 3,000 separately).
+  - Significance: overlapping-CI eyeballing · McNemar's test (accuracy only, not macro-F1) · **paired bootstrap of the macro-F1 difference** (resample tweets; score both models on each resample).
+- **Decision:**
+  - Table A = every model on the same IDs.
+  - Table B = self-hosted models on the full test set.
+  - Robustness by language-mix bucket uses the same IDs; YouTube uses the LLM's 300-comment subset.
+  - Table D = paired bootstrap (2,000 resamples) for best fine-tuned vs best LLM, best fine-tuned vs TF-IDF, and best LLM vs TF-IDF. It reports the difference with its 95% CI and the share of resamples where A is not better.
+- **Reasoning:** Pairing removes the shared "difficulty of this sample", so real differences show up with far fewer tweets than two independent CIs need. Macro-F1 is our headline metric (D-007), so the test must be on macro-F1, which rules out McNemar.
+- **Trade-offs accepted:** Three comparisons with no multiple-comparison correction; they are reported as estimates with intervals, not as pass/fail tests. Mix buckets on 600 tweets are small (mostly-English ≈ 75), so per-bucket gaps there are indicative only.
+- **Revisit if:** a claim rests on a bucket-level difference. Then compute paired CIs per bucket on the full 3,000 for the local models.
+
+### D-036 — Error analysis: sample confident mistakes across all six confusion types
+- **Date / phase:** 2026-10-06 · Phase 4
+- **Context:** The brief asks for 10 real misclassified examples, explained.
+- **Options considered:** a random sample of mistakes (dominated by neutral↔polar confusions, which are the most common) · **the most confident mistakes in each true→predicted cell** · hand-picking "interesting" ones (cherry-picking).
+- **Decision:** `scripts/error_analysis.py` takes up to 4 of the most confident mistakes per confusion cell, with every other model's prediction alongside. The 10 explained examples are chosen from that pool to cover the cells. The output quotes tweet text, so it goes to git-ignored `outputs/`. Only the 10 discussed tweets appear in the docs, as short quotations for analysis (as research papers do), which is compatible with D-004.
+- **Reasoning:** Confident mistakes are the most informative: either the model learned something wrong, or the gold label is questionable (C-010 showed many are). Covering every cell avoids a story told only about neutral.
+- **Trade-offs accepted:** Explanations are one person's judgement. Where the gold label itself looks wrong, we say so rather than inventing a model failure. The owner's blind relabelling of a sample would strengthen this (offered in Phase 4).
+- **Revisit if:** the owner relabels a sample. Then report the share of "model right, gold wrong" cases.

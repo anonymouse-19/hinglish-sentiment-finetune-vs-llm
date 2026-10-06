@@ -64,6 +64,10 @@ python scripts/run_llm_baseline.py --mode zero --split val   # one run; or all s
 python scripts/run_llm_all.py   # free tier: re-run daily until "All runs complete"
 python scripts/compare_baselines.py   # every model scored on the same tweet ids
 
+# Phase 4: evaluation (re-run whenever new results arrive)
+python scripts/evaluate_all.py     # tables A-D, headline, figures -> reports/evaluation/, reports/figures/
+python scripts/error_analysis.py   # confident mistakes per confusion cell -> outputs/ (quotes tweets; git-ignored)
+
 # Phase 3: fine-tuning (GPU): open notebooks/phase3_finetune_colab.ipynb in Colab (T4), or locally:
 python scripts/finetune_sweep.py --family encoder --smoke   # tiny models, CPU, ~1 min pipeline check
 python scripts/finetune_sweep.py --family encoder           # XLM-R / MuRIL sweep (needs a GPU)

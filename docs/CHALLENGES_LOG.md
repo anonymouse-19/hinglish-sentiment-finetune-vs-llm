@@ -17,6 +17,7 @@ Only real difficulties that actually happened, each with a STAR version for inte
 | C-011 | 3 | MuRIL can't see emoji: 19% of tweets lose them to `[UNK]` |
 | C-012 | 3 | Mixed-precision dtype mismatch in the QLoRA classifier, caught by a CPU smoke test |
 | C-013 | 3 | Installing transformers silently downgraded a pinned library |
+| C-014 | 3 | *(owner)* First GitHub push failed: placeholder URL saved as the remote |
 
 ---
 
@@ -253,3 +254,17 @@ Only real difficulties that actually happened, each with a STAR version for inte
   - *T:* Keep the environment reproducible and the earlier results valid.
   - *A:* I noticed pip had silently downgraded a pinned library to satisfy transformers. I updated the pins in both the local and Colab requirement files and re-ran the full data pipeline under the new version.
   - *R:* The data statistics came out byte-identical, so the earlier results stand, and the Colab install file can no longer request an impossible combination.
+
+### C-014 — *(owner)* First GitHub push failed: placeholder URL saved as the remote
+- **Phase:** 3 (Fine-tuning setup)
+- **What happened:** Running the push instructions verbatim gave `fatal: unable to access 'https://github.com/<your-username>/…': The requested URL returned error: 400`. Re-running with the real username then failed with `error: remote origin already exists`, and the push still went to the placeholder URL.
+- **Root cause:** `git remote add` had already succeeded the first time, saving the remote named `origin` with the literal `<your-username>` placeholder. `remote add` refuses to overwrite an existing remote, so the second attempt didn't change anything.
+- **What was tried:** Repeating `git remote add` with the correct URL. It did **not** work (the remote already existed).
+- **Final fix:** `git remote set-url origin https://github.com/anonymouse-19/hinglish-sentiment-finetune-vs-llm.git` then `git push -u origin main`. The notebook's `GITHUB_REPO` was also pre-filled, so no placeholder needs editing anymore.
+- **Lesson learned:** `git remote add` creates a remote and `git remote set-url` changes it; `git remote -v` shows what is configured. Instructions with placeholders should be pre-filled where possible.
+- **STAR:**
+  - *S:* Publishing my project to GitHub for the first time so Colab could clone it, my push failed with an HTTP 400.
+  - *T:* Get the code onto GitHub without losing local history.
+  - *A:* I found the remote had been saved with a placeholder URL, and that `remote add` won't overwrite an existing remote. I inspected it with `git remote -v` and corrected it with `git remote set-url`.
+  - *R:* The push succeeded, and I now understand how git remotes are stored and changed.
+

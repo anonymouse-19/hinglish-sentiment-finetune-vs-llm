@@ -321,6 +321,7 @@ Every non-trivial decision, including the ones the project owner made when answe
   - Cost per 1k is still computed from list prices (D-022), as if we were paying.
 - **Revisit if:** the subset CI is too wide to support the headline claim. Then extend the test subset over more free days (the cache keeps earlier answers), or spend about $1 on the paid tier.
 - **Update 2026-10-06:** the daily token limit behaves as a rolling 24-hour window, not a calendar day. Quota spent at ~02:00 was usable again by ~15:30, so runs can be scheduled roughly every 24 h after the previous one.
+- **Update 2026-10-07:** once the window is full, Groq answers 429 with `retry-after` of only ~2–4 minutes (as tokens age out of the window), not hours. The client waits that out (it's below the 600 s "daily quota" cut-off), so a single `run_llm_all.py` left running **self-paces to the quota's refill rate**: ~200K tokens per 24 h, with no manual daily restarts. Only the successful attempt is timed, so latency figures are unaffected.
 
 ### D-024 — Report 95% bootstrap confidence intervals for macro-F1
 - **Date / phase:** 2026-10-05 · Phase 2

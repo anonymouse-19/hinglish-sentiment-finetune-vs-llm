@@ -18,11 +18,11 @@
 
 | Model | Code-mixed | Mostly Hindi | Mostly English | YouTube (OOD) |
 |---|---|---|---|---|
-| TF-IDF + LogReg | 0.653 | 0.719 | 0.500 | 0.411 |
-| gpt-oss-120b few-shot | 0.634 | 0.651 | 0.695 | nan |
-| gpt-oss-120b zero-shot | 0.629 | 0.604 | 0.704 | nan |
+| TF-IDF + LogReg | 0.653 | 0.719 | 0.500 | 0.415 |
+| gpt-oss-120b few-shot | 0.634 | 0.651 | 0.695 | 0.737 |
+| gpt-oss-120b zero-shot | 0.629 | 0.604 | 0.704 | 0.730 |
 
-Bucket sizes: Code-mixed 286, Mostly Hindi 238, Mostly English 74; YouTube 3168.
+Bucket sizes: Code-mixed 286, Mostly Hindi 238, Mostly English 74; YouTube 300.
 
 ## D. Paired bootstrap: is the difference real?
 

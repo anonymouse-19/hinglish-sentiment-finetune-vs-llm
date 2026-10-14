@@ -64,7 +64,7 @@ flowchart LR
         F --> G[("train / val / test<br/>parquet")]
         Y[("HF Hub<br/>YouTube comments")] --> Y2[Clean + dedupe] --> G2[("test_youtube<br/>parquet")]
     end
-    subgraph P2["Phase 2 · Baselines (in progress)"]
+    subgraph P2["Phase 2 · Baselines (done)"]
         H["TF-IDF word+char n-grams<br/>+ LogReg (done)"]
         FS["Few-shot picker<br/>out-of-fold label confidence"]
         I["LLMClient → Groq gpt-oss-120b<br/>zero-/few-shot · pacing · retries<br/>disk cache · tokens, latency, $"]
@@ -277,13 +277,13 @@ flowchart LR
 - **Language mix is confounded with sentiment.** On test, mostly-Hindi tweets are 44% negative, while mostly-English tweets are 56% positive. Robustness results must account for this.
 - **Tooling lesson.** `langdetect` labels romanized Hindi as Indonesian or Somali, and never as Hindi (0/300), so it can't be used as a filter.
 
-**Phase 2 (baselines), so far**
+**Phase 2 (baselines): final**
 
 | Model | Val macro-F1 | Test macro-F1 [95% CI] | YouTube (OOD) macro-F1 | p50 latency | Size |
 |---|---|---|---|---|---|
 | TF-IDF (word 1–2 + char 2–5) + LogReg, C=0.3 | 0.642 | **0.687** [0.669, 0.703] | 0.411 | 1.9 ms (laptop CPU, batch 1) | 6.2 MB (316k weights) |
 | Groq gpt-oss-120b zero-shot | 0.602 [0.531, 0.664]¹ | **0.637** [0.600, 0.674]² | **0.730** [0.678, 0.782]³ | 625 ms (API, incl. network) | 117B MoE, 5.1B active (hosted) |
-| Groq gpt-oss-120b few-shot | 0.674 [0.608, 0.731]¹ | **0.656** [0.622, 0.694]² | *running* | 702 ms (API, incl. network) | 117B MoE, 5.1B active (hosted) |
+| Groq gpt-oss-120b few-shot | 0.674 [0.608, 0.731]¹ | **0.656** [0.622, 0.694]² | **0.737** [0.684, 0.785]³ | 702 ms (API, incl. network) | 117B MoE, 5.1B active (hosted) |
 
 ¹ LLM val scores are on a 200-tweet stratified subset (D-023). TF-IDF scores **0.688 [0.619, 0.747]** on those same 200 tweets. LLM cost per 1k predictions (list price): zero-shot **$0.070**, few-shot **$0.101**.
 
@@ -293,6 +293,11 @@ flowchart LR
 
 ³ YouTube = a 300-comment stratified subset (D-023). **The out-of-domain result reverses the picture:** on the same 300 comments TF-IDF scores 0.415, and the paired difference zero-shot − TF-IDF is **+0.315 [+0.246, +0.383]**. The LLM scores *higher* on YouTube than on the tweets (0.73 vs 0.64), while TF-IDF collapses (0.69 → 0.41).
 **Emerging story:** supervised models learn the annotators' conventions (they win in-domain, especially on mostly-Hindi text) but are brittle under domain shift; the LLM is robust but doesn't share the dataset's definition of "neutral". The decisive open question is where the fine-tuned encoders land: pre-training should make them more robust than TF-IDF, but how much?
+
+**Phase 2 in one paragraph.**
+- *In-domain:* on the official test set, a 6 MB TF-IDF model (0.690) matches or beats a 117B LLM (few-shot 0.656, not significantly different; zero-shot 0.637, significantly worse) at about 1/20,000 of the cost per prediction and about 1/350 of the latency.
+- *Out of domain:* on YouTube comments the order flips completely (LLM 0.73–0.74 vs TF-IDF 0.415). TF-IDF labels 1,022 of 1,419 negative comments "neutral", because their vocabulary was never seen in training. The LLM's YouTube p95 latency rises to about 5.5 s on long comments.
+- *Few-shot:* it helps in-domain, mainly by teaching the dataset's "neutral" convention (neutral F1 0.40 → 0.54 on val), but adds nothing out of domain, while costing 1.4–1.7× zero-shot.
 
 - **TF-IDF is a respectable floor:** 0.687 on the official test set, against 0.750 for the best SemEval-2020 system. Per-class F1 on test: negative 0.71, neutral 0.62, positive 0.74. **Neutral is hardest**, and most errors are neutral confused with either polarity.
 - **Char n-grams carry the signal.** Char-only (0.640 val) beats word-only (0.614). Combining them adds little (0.642), as expected for free-spelling Hinglish.
@@ -311,7 +316,7 @@ flowchart LR
 
 **Status:** Phases 2–5 are being prepared in parallel (owner's call). External runs (LLM quota, Colab) are the bottleneck, not code.
 
-*Phase 2 (Baselines):* 🟡 TF-IDF ✅ · LLM val ✅ (prompts frozen, D-025) · LLM test (600) + YouTube (300) ⏳. `python scripts/run_llm_all.py` resumes the queue. The quota is a rolling 24 h window (D-023 update).
+*Phase 2 (Baselines):* ✅ complete (2026-10-14). TF-IDF (full test + YouTube) and gpt-oss-120b zero-/few-shot on val 200, test 600 and YouTube 300. All results are in `reports/baselines/`, with the comparison in `reports/evaluation/results.md`.
 
 *Phase 3 (Fine-tuning):* 🟡 code complete and pushed to GitHub (`anonymouse-19/hinglish-sentiment-finetune-vs-llm`). Waiting on the Colab run.
 

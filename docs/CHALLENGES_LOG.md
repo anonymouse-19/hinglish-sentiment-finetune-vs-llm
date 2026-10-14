@@ -19,6 +19,7 @@ Only real difficulties that actually happened, each with a STAR version for inte
 | C-013 | 3 | Installing transformers silently downgraded a pinned library |
 | C-014 | 3 | *(owner)* First GitHub push failed: placeholder URL saved as the remote |
 | C-015 | 2 | A network outage stopped the LLM run, and the batch script blamed the quota |
+| C-016 | 2 | A Windows restart killed the multi-day LLM batch, and nothing restarted it |
 
 ---
 
@@ -285,3 +286,16 @@ Only real difficulties that actually happened, each with a STAR version for inte
   - *T:* Find out whether that was true before losing a day waiting.
   - *A:* I checked the logs (connection errors, not 429s), then verified connectivity, certificates and the system clock with curl and openssl. I found a brief network outage, gave network errors a longer retry budget than rate limits, and made the script report the real stop reason.
   - *R:* The run resumed immediately from its cache with no lost work, and future failures are diagnosed correctly by the tool itself.
+
+### C-016 — A Windows restart killed the multi-day LLM batch, and nothing restarted it
+- **Phase:** 2 (Baselines)
+- **What happened:** The self-pacing LLM batch (started Oct 6) stopped on **Oct 8 at 09:34**, partway through the zero-shot YouTube run, with `subprocess.CalledProcessError: … returned non-zero exit status 1073807364`. Nobody noticed for six days, because the process was simply gone.
+- **Root cause:** 1073807364 = `0x40010004` (`DBG_TERMINATE_PROCESS`), which Windows uses when it terminates processes during shutdown or restart (most likely an automatic update restart). Nothing restarts a terminal process after a reboot.
+- **What was tried:** Decoded the exit code, and checked the cache and the per-run metrics to see what had survived: 224/300 YouTube answers were cached, and both test runs were complete.
+- **Final fix:** Re-ran `run_llm_all.py` on Oct 14. It skipped the finished runs, reused the 224 cached answers, and completed both YouTube runs the same evening. Documented that long unattended runs need the machine to stay on (D-023 update).
+- **Lesson learned:** Design long jobs to be **resumable** (cache every unit of work, skip finished units), because on a personal laptop *something* will kill a multi-day process. Resumability turned a crash into a one-command restart with zero lost API spend. A scheduled task or a cloud VM would add auto-restart, but wasn't worth it for a one-off study.
+- **STAR:**
+  - *S:* A rate-limited LLM evaluation ran for days on my laptop and was killed by a Windows restart midway.
+  - *T:* Finish the evaluation without paying for, or waiting on, requests already made.
+  - *A:* I decoded the exit code (`0x40010004`, process killed at shutdown) and confirmed what was cached. Then I simply re-ran the job: I had built it to cache every response and skip finished work.
+  - *R:* It resumed exactly where it stopped (224/300 answers reused) and finished the same evening. The crash cost nothing but calendar time.

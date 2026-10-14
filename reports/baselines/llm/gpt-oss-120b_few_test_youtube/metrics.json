@@ -1,0 +1,112 @@
+{
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "mode": "few",
+  "split": "test_youtube",
+  "n_planned": 300,
+  "complete": true,
+  "stopped_early": null,
+  "generation": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "reasoning_effort": "low",
+    "extra_body": {}
+  },
+  "prices": {
+    "as_of": "2026-10-05",
+    "source": "Groq model page (console.groq.com/docs/models) and third-party price trackers",
+    "input_per_million": 0.15,
+    "cached_input_per_million": 0.075,
+    "output_per_million": 0.6
+  },
+  "few_shot_ids": [
+    "sm_15957",
+    "sm_23918",
+    "sm_8719",
+    "sm_42457",
+    "sm_25105",
+    "sm_17432",
+    "sm_39792",
+    "sm_35809",
+    "sm_43337"
+  ],
+  "n": 300,
+  "macro_f1": 0.7366398222180127,
+  "accuracy": 0.7466666666666667,
+  "weighted_f1": 0.7484850470019021,
+  "n_invalid": 0,
+  "per_class": {
+    "negative": {
+      "precision": 0.8636363636363636,
+      "recall": 0.7089552238805971,
+      "f1": 0.7786885245901639,
+      "support": 134
+    },
+    "neutral": {
+      "precision": 0.6097560975609756,
+      "recall": 0.684931506849315,
+      "f1": 0.6451612903225806,
+      "support": 73
+    },
+    "positive": {
+      "precision": 0.7314814814814815,
+      "recall": 0.8494623655913979,
+      "f1": 0.7860696517412935,
+      "support": 93
+    }
+  },
+  "confusion_matrix": {
+    "labels_true": [
+      "negative",
+      "neutral",
+      "positive"
+    ],
+    "labels_pred": [
+      "negative",
+      "neutral",
+      "positive",
+      "invalid"
+    ],
+    "matrix": [
+      [
+        95,
+        22,
+        17,
+        0
+      ],
+      [
+        11,
+        50,
+        12,
+        0
+      ],
+      [
+        4,
+        10,
+        79,
+        0
+      ]
+    ]
+  },
+  "macro_f1_ci_low": 0.6840702194089426,
+  "macro_f1_ci_high": 0.7852741645654343,
+  "n_resamples": 1000,
+  "latency": {
+    "n": 300,
+    "p50_ms": 1342.3564999975497,
+    "p95_ms": 5683.02356000495,
+    "mean_ms": 1921.0103046670945
+  },
+  "tokens": {
+    "prompt_mean": 603.05,
+    "completion_mean": 61.166666666666664,
+    "reasoning_mean": 51.166666666666664,
+    "cached_prompt_share": 0.6990244037255064,
+    "finish_reason_length": 0
+  },
+  "cost": {
+    "total_usd": 0.028662450000000003,
+    "per_1k_predictions_usd": 0.0955415
+  },
+  "requests_answered_from_cache_this_run": 0
+}

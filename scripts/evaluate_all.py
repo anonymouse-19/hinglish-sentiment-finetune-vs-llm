@@ -145,7 +145,8 @@ def fig_robustness(rows: list[dict], buckets: dict, yt_rows: list[dict], path: P
         ax.axhline(y, color=GRID, linewidth=0.8, zorder=1)
         for j, k in enumerate(keys):
             if k in vals:
-                ax.scatter(vals[k], y, s=60, marker=markers[j % len(markers)], color=FAMILY_COLORS[fams[k]],
+                dodge = (j - (len(keys) - 1) / 2) * 0.14  # small vertical offset so equal scores don't hide each other
+                ax.scatter(vals[k], y + dodge, s=60, marker=markers[j % len(markers)], color=FAMILY_COLORS[fams[k]],
                            edgecolor=SURFACE, linewidth=1.5, zorder=3)
     ax.set_yticks(range(len(cats)), [f"{lbl}  (n={n})" for lbl, _, n in cats])
     ax.invert_yaxis()

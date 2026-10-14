@@ -8,7 +8,7 @@ This project compares, on the same data and metrics:
 - a **fine-tuned multilingual encoder** (XLM-R / MuRIL), and
 - a **LoRA/QLoRA fine-tuned small decoder** (~1–3B), all trained on a **free Colab T4**.
 
-> **Status:** Phase 1 (data) ✅ · Phase 2 (baselines) ⏳ TF-IDF + LLM val done, LLM test runs in progress · Phase 3 (fine-tuning) ⏳ code ready, Colab runs next · (fine-tuning) · Phase 4 (evaluation) · Phase 5 (ship)
+> **Status:** Phase 1 (data) ✅ · Phase 2 (baselines) ✅ · Phase 3 (fine-tuning) ⏳ code ready, Colab runs next · (fine-tuning) · Phase 4 (evaluation) · Phase 5 (ship)
 
 ## Results
 
@@ -17,10 +17,16 @@ This project compares, on the same data and metrics:
 | Model | Macro-F1 (test) | p50 latency | Cost / 1k predictions | Model size |
 |---|---|---|---|---|
 | TF-IDF + LogReg | 0.687 [0.669, 0.703] | 1.9 ms (CPU) | – | 6.2 MB |
-| Groq `gpt-oss-120b`, zero-shot | – | – | – | – |
-| Groq `gpt-oss-120b`, few-shot | – | – | – | – |
+| Groq `gpt-oss-120b`, zero-shot | 0.637 [0.600, 0.674]* | 625 ms (API) | $0.068 | 117B MoE (hosted) |
+| Groq `gpt-oss-120b`, few-shot | 0.656 [0.622, 0.694]* | 702 ms (API) | $0.114 | 117B MoE (hosted) |
 | XLM-R / MuRIL (fine-tuned, best of 9) | – | – | – | – |
 | Qwen3-1.7B + QLoRA (best of 4) | – | – | – | – |
+
+\* LLMs are scored on a 600-tweet stratified subset of test (free-tier quota); TF-IDF scores 0.690 on those same tweets. Full same-tweet comparison, paired significance tests and robustness: [reports/evaluation/results.md](reports/evaluation/results.md).
+
+**Baselines so far:** in-domain, TF-IDF matches the 117B LLM at ~1/20,000 of the cost. **Out of domain (YouTube comments) the LLM wins by +0.32 macro-F1** (0.73 vs 0.41), so the classical model is brittle. Where the fine-tuned models land is the question Phase 3 answers.
+
+![Robustness by language mix and domain](reports/figures/robustness.png)
 
 **Key insight:** *"The fine-tuned model reaches X% of the LLM's macro-F1 at Y× lower cost"*, measured in Phase 4.
 

@@ -260,42 +260,130 @@
         }
       },
       "youtube": {
-        "n": 3168,
+        "n": 300,
         "complete": true,
         "rows": [
+          {
+            "key": "llm_few",
+            "name": "gpt-oss-120b few-shot",
+            "family": "llm",
+            "n": 300,
+            "macro_f1": 0.7366398222180127,
+            "macro_f1_ci_low": 0.6840702194089426,
+            "macro_f1_ci_high": 0.7852741645654343,
+            "n_resamples": 1000,
+            "accuracy": 0.7466666666666667,
+            "n_invalid": 0,
+            "f1_per_class": {
+              "negative": 0.7786885245901639,
+              "neutral": 0.6451612903225806,
+              "positive": 0.7860696517412935
+            },
+            "confusion": [
+              [
+                95,
+                22,
+                17,
+                0
+              ],
+              [
+                11,
+                50,
+                12,
+                0
+              ],
+              [
+                4,
+                10,
+                79,
+                0
+              ]
+            ],
+            "p50_ms": 702.396150038112,
+            "latency_basis": "groq API, incl. network",
+            "usd_per_1k": 0.11388099999999998,
+            "cost_basis": "billed tokens x list price (2026-10-05)",
+            "params": "117B (MoE, 5.1B active)",
+            "size": "hosted",
+            "complete": true
+          },
+          {
+            "key": "llm_zero",
+            "name": "gpt-oss-120b zero-shot",
+            "family": "llm",
+            "n": 300,
+            "macro_f1": 0.7303408215620816,
+            "macro_f1_ci_low": 0.6780464174009114,
+            "macro_f1_ci_high": 0.7822533573756804,
+            "n_resamples": 1000,
+            "accuracy": 0.7433333333333333,
+            "n_invalid": 0,
+            "f1_per_class": {
+              "negative": 0.7843137254901961,
+              "neutral": 0.6351351351351351,
+              "positive": 0.7715736040609137
+            },
+            "confusion": [
+              [
+                100,
+                18,
+                16,
+                0
+              ],
+              [
+                14,
+                47,
+                12,
+                0
+              ],
+              [
+                7,
+                10,
+                76,
+                0
+              ]
+            ],
+            "p50_ms": 624.6828000294045,
+            "latency_basis": "groq API, incl. network",
+            "usd_per_1k": 0.068149,
+            "cost_basis": "billed tokens x list price (2026-10-05)",
+            "params": "117B (MoE, 5.1B active)",
+            "size": "hosted",
+            "complete": true
+          },
           {
             "key": "tfidf",
             "name": "TF-IDF + LogReg",
             "family": "classical",
-            "n": 3168,
-            "macro_f1": 0.41134575519059063,
-            "macro_f1_ci_low": 0.3934961415753722,
-            "macro_f1_ci_high": 0.4293117013867509,
+            "n": 300,
+            "macro_f1": 0.41497927874366275,
+            "macro_f1_ci_low": 0.3523802965467994,
+            "macro_f1_ci_high": 0.47403406692991723,
             "n_resamples": 1000,
-            "accuracy": 0.411300505050505,
+            "accuracy": 0.41333333333333333,
             "n_invalid": 0,
             "f1_per_class": {
-              "negative": 0.3504273504273504,
-              "neutral": 0.42829076620825146,
-              "positive": 0.4553191489361702
+              "negative": 0.3956043956043956,
+              "neutral": 0.41522491349480967,
+              "positive": 0.43410852713178294
             },
             "confusion": [
               [
-                328,
-                1022,
-                69,
+                36,
+                94,
+                4,
                 0
               ],
               [
-                75,
-                654,
-                38,
+                9,
+                60,
+                4,
                 0
               ],
               [
-                50,
-                611,
-                321,
+                3,
+                62,
+                28,
                 0
               ]
             ],

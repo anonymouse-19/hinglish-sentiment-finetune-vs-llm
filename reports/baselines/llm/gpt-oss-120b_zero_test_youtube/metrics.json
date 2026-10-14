@@ -1,0 +1,102 @@
+{
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "mode": "zero",
+  "split": "test_youtube",
+  "n_planned": 300,
+  "complete": true,
+  "stopped_early": null,
+  "generation": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "reasoning_effort": "low",
+    "extra_body": {}
+  },
+  "prices": {
+    "as_of": "2026-10-05",
+    "source": "Groq model page (console.groq.com/docs/models) and third-party price trackers",
+    "input_per_million": 0.15,
+    "cached_input_per_million": 0.075,
+    "output_per_million": 0.6
+  },
+  "few_shot_ids": [],
+  "n": 300,
+  "macro_f1": 0.7303408215620816,
+  "accuracy": 0.7433333333333333,
+  "weighted_f1": 0.7440641641940537,
+  "n_invalid": 0,
+  "per_class": {
+    "negative": {
+      "precision": 0.8264462809917356,
+      "recall": 0.746268656716418,
+      "f1": 0.7843137254901961,
+      "support": 134
+    },
+    "neutral": {
+      "precision": 0.6266666666666667,
+      "recall": 0.6438356164383562,
+      "f1": 0.6351351351351351,
+      "support": 73
+    },
+    "positive": {
+      "precision": 0.7307692307692307,
+      "recall": 0.8172043010752689,
+      "f1": 0.7715736040609137,
+      "support": 93
+    }
+  },
+  "confusion_matrix": {
+    "labels_true": [
+      "negative",
+      "neutral",
+      "positive"
+    ],
+    "labels_pred": [
+      "negative",
+      "neutral",
+      "positive",
+      "invalid"
+    ],
+    "matrix": [
+      [
+        100,
+        18,
+        16,
+        0
+      ],
+      [
+        14,
+        47,
+        12,
+        0
+      ],
+      [
+        7,
+        10,
+        76,
+        0
+      ]
+    ]
+  },
+  "macro_f1_ci_low": 0.6780464174009114,
+  "macro_f1_ci_high": 0.7822533573756804,
+  "n_resamples": 1000,
+  "latency": {
+    "n": 300,
+    "p50_ms": 597.238149959594,
+    "p95_ms": 5277.352350065485,
+    "mean_ms": 1372.0596143320047
+  },
+  "tokens": {
+    "prompt_mean": 255.05,
+    "completion_mean": 54.52,
+    "reasoning_mean": 44.52,
+    "cached_prompt_share": 0.0,
+    "finish_reason_length": 0
+  },
+  "cost": {
+    "total_usd": 0.02129085,
+    "per_1k_predictions_usd": 0.0709695
+  },
+  "requests_answered_from_cache_this_run": 224
+}

@@ -282,7 +282,7 @@ flowchart LR
 | Model | Val macro-F1 | Test macro-F1 [95% CI] | YouTube (OOD) macro-F1 | p50 latency | Size |
 |---|---|---|---|---|---|
 | TF-IDF (word 1–2 + char 2–5) + LogReg, C=0.3 | 0.642 | **0.687** [0.669, 0.703] | 0.411 | 1.9 ms (laptop CPU, batch 1) | 6.2 MB (316k weights) |
-| Groq gpt-oss-120b zero-shot | 0.602 [0.531, 0.664]¹ | **0.637** [0.600, 0.674]² | *running* | 625 ms (API, incl. network) | 117B MoE, 5.1B active (hosted) |
+| Groq gpt-oss-120b zero-shot | 0.602 [0.531, 0.664]¹ | **0.637** [0.600, 0.674]² | **0.730** [0.678, 0.782]³ | 625 ms (API, incl. network) | 117B MoE, 5.1B active (hosted) |
 | Groq gpt-oss-120b few-shot | 0.674 [0.608, 0.731]¹ | **0.656** [0.622, 0.694]² | *running* | 702 ms (API, incl. network) | 117B MoE, 5.1B active (hosted) |
 
 ¹ LLM val scores are on a 200-tweet stratified subset (D-023). TF-IDF scores **0.688 [0.619, 0.747]** on those same 200 tweets. LLM cost per 1k predictions (list price): zero-shot **$0.070**, few-shot **$0.101**.
@@ -290,6 +290,9 @@ flowchart LR
 ² Test = the 600-tweet stratified subset (D-023). TF-IDF scores 0.690 [0.651, 0.726] on the same 600 tweets (0.687 on all 3,000, so the subset is representative). Paired bootstrap: zero-shot − TF-IDF = **−0.053 [−0.099, −0.009]**, so zero-shot is significantly *worse* than TF-IDF on test, confirming the val finding (C-010). Zero-shot cost on test: $0.068 per 1k. Few-shot − TF-IDF = **−0.034 [−0.078, +0.011]**: not significantly different, at $0.114 per 1k.
 
 **Robustness on the 600 test tweets (macro-F1), TF-IDF / zero-shot / few-shot:** code-mixed (n=286) 0.653 / 0.629 / 0.634 · mostly Hindi (n=238) **0.719** / 0.604 / 0.651 · mostly English (n=74) 0.500 / **0.704** / 0.695. The LLM is strongest where the text is English, and the supervised model where it is Hindi. That fits an LLM pre-trained mostly on English, versus a model that learned romanised-Hindi n-grams from the labelled data. (The English bucket is small; Phase 4 tests this with paired CIs.)
+
+³ YouTube = a 300-comment stratified subset (D-023). **The out-of-domain result reverses the picture:** on the same 300 comments TF-IDF scores 0.415, and the paired difference zero-shot − TF-IDF is **+0.315 [+0.246, +0.383]**. The LLM scores *higher* on YouTube than on the tweets (0.73 vs 0.64), while TF-IDF collapses (0.69 → 0.41).
+**Emerging story:** supervised models learn the annotators' conventions (they win in-domain, especially on mostly-Hindi text) but are brittle under domain shift; the LLM is robust but doesn't share the dataset's definition of "neutral". The decisive open question is where the fine-tuned encoders land: pre-training should make them more robust than TF-IDF, but how much?
 
 - **TF-IDF is a respectable floor:** 0.687 on the official test set, against 0.750 for the best SemEval-2020 system. Per-class F1 on test: negative 0.71, neutral 0.62, positive 0.74. **Neutral is hardest**, and most errors are neutral confused with either polarity.
 - **Char n-grams carry the signal.** Char-only (0.640 val) beats word-only (0.614). Combining them adds little (0.642), as expected for free-spelling Hinglish.

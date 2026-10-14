@@ -283,11 +283,13 @@ flowchart LR
 |---|---|---|---|---|---|
 | TF-IDF (word 1–2 + char 2–5) + LogReg, C=0.3 | 0.642 | **0.687** [0.669, 0.703] | 0.411 | 1.9 ms (laptop CPU, batch 1) | 6.2 MB (316k weights) |
 | Groq gpt-oss-120b zero-shot | 0.602 [0.531, 0.664]¹ | **0.637** [0.600, 0.674]² | *running* | 625 ms (API, incl. network) | 117B MoE, 5.1B active (hosted) |
-| Groq gpt-oss-120b few-shot | 0.674 [0.608, 0.731]¹ | *running* | *running* | 889 ms (API, incl. network) | 117B MoE, 5.1B active (hosted) |
+| Groq gpt-oss-120b few-shot | 0.674 [0.608, 0.731]¹ | **0.656** [0.622, 0.694]² | *running* | 702 ms (API, incl. network) | 117B MoE, 5.1B active (hosted) |
 
 ¹ LLM val scores are on a 200-tweet stratified subset (D-023). TF-IDF scores **0.688 [0.619, 0.747]** on those same 200 tweets. LLM cost per 1k predictions (list price): zero-shot **$0.070**, few-shot **$0.101**.
 
-² Test = the 600-tweet stratified subset (D-023). TF-IDF scores 0.690 [0.651, 0.726] on the same 600 tweets (0.687 on all 3,000, so the subset is representative). Paired bootstrap: zero-shot − TF-IDF = **−0.053 [−0.099, −0.009]**, so zero-shot is significantly *worse* than TF-IDF on test, confirming the val finding (C-010). Zero-shot cost on test: $0.068 per 1k.
+² Test = the 600-tweet stratified subset (D-023). TF-IDF scores 0.690 [0.651, 0.726] on the same 600 tweets (0.687 on all 3,000, so the subset is representative). Paired bootstrap: zero-shot − TF-IDF = **−0.053 [−0.099, −0.009]**, so zero-shot is significantly *worse* than TF-IDF on test, confirming the val finding (C-010). Zero-shot cost on test: $0.068 per 1k. Few-shot − TF-IDF = **−0.034 [−0.078, +0.011]**: not significantly different, at $0.114 per 1k.
+
+**Robustness on the 600 test tweets (macro-F1), TF-IDF / zero-shot / few-shot:** code-mixed (n=286) 0.653 / 0.629 / 0.634 · mostly Hindi (n=238) **0.719** / 0.604 / 0.651 · mostly English (n=74) 0.500 / **0.704** / 0.695. The LLM is strongest where the text is English, and the supervised model where it is Hindi. That fits an LLM pre-trained mostly on English, versus a model that learned romanised-Hindi n-grams from the labelled data. (The English bucket is small; Phase 4 tests this with paired CIs.)
 
 - **TF-IDF is a respectable floor:** 0.687 on the official test set, against 0.750 for the best SemEval-2020 system. Per-class F1 on test: negative 0.71, neutral 0.62, positive 0.74. **Neutral is hardest**, and most errors are neutral confused with either polarity.
 - **Char n-grams carry the signal.** Char-only (0.640 val) beats word-only (0.614). Combining them adds little (0.642), as expected for free-spelling Hinglish.

@@ -1,0 +1,152 @@
+{
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "mode": "few",
+  "split": "test",
+  "n_planned": 600,
+  "complete": true,
+  "stopped_early": null,
+  "generation": {
+    "temperature": 0,
+    "max_completion_tokens": 1024,
+    "reasoning_effort": "low",
+    "extra_body": {}
+  },
+  "prices": {
+    "as_of": "2026-10-05",
+    "source": "Groq model page (console.groq.com/docs/models) and third-party price trackers",
+    "input_per_million": 0.15,
+    "cached_input_per_million": 0.075,
+    "output_per_million": 0.6
+  },
+  "few_shot_ids": [
+    "sm_15957",
+    "sm_23918",
+    "sm_8719",
+    "sm_42457",
+    "sm_25105",
+    "sm_17432",
+    "sm_39792",
+    "sm_35809",
+    "sm_43337"
+  ],
+  "n": 600,
+  "macro_f1": 0.6560242783774134,
+  "accuracy": 0.6766666666666666,
+  "weighted_f1": 0.6465793304221252,
+  "n_invalid": 0,
+  "per_class": {
+    "negative": {
+      "precision": 0.6209386281588448,
+      "recall": 0.9502762430939227,
+      "f1": 0.7510917030567685,
+      "support": 181
+    },
+    "neutral": {
+      "precision": 0.7272727272727273,
+      "recall": 0.3287671232876712,
+      "f1": 0.4528301886792453,
+      "support": 219
+    },
+    "positive": {
+      "precision": 0.7232142857142857,
+      "recall": 0.81,
+      "f1": 0.7641509433962265,
+      "support": 200
+    }
+  },
+  "confusion_matrix": {
+    "labels_true": [
+      "negative",
+      "neutral",
+      "positive"
+    ],
+    "labels_pred": [
+      "negative",
+      "neutral",
+      "positive",
+      "invalid"
+    ],
+    "matrix": [
+      [
+        172,
+        5,
+        4,
+        0
+      ],
+      [
+        89,
+        72,
+        58,
+        0
+      ],
+      [
+        16,
+        22,
+        162,
+        0
+      ]
+    ]
+  },
+  "macro_f1_ci_low": 0.6218633087586791,
+  "macro_f1_ci_high": 0.6943945435807884,
+  "n_resamples": 1000,
+  "by_mix_bucket": {
+    "code_mixed": {
+      "n": 286,
+      "macro_f1": 0.6343526458267169,
+      "accuracy": 0.6573426573426573,
+      "label_share": {
+        "negative": 0.24125874125874125,
+        "neutral": 0.3741258741258741,
+        "positive": 0.38461538461538464
+      }
+    },
+    "mostly_english": {
+      "n": 74,
+      "macro_f1": 0.69526137677002,
+      "accuracy": 0.7162162162162162,
+      "label_share": {
+        "negative": 0.10810810810810811,
+        "neutral": 0.33783783783783783,
+        "positive": 0.5540540540540541
+      }
+    },
+    "mostly_hindi": {
+      "n": 238,
+      "macro_f1": 0.6512736718619071,
+      "accuracy": 0.6848739495798319,
+      "label_share": {
+        "negative": 0.4369747899159664,
+        "neutral": 0.35714285714285715,
+        "positive": 0.20588235294117646
+      }
+    },
+    "no_lang_words": {
+      "n": 2,
+      "macro_f1": 0.3333333333333333,
+      "accuracy": 1.0,
+      "label_share": {
+        "neutral": 1.0
+      }
+    }
+  },
+  "latency": {
+    "n": 600,
+    "p50_ms": 702.396150038112,
+    "p95_ms": 2687.5876449747,
+    "mean_ms": 1090.1517758345774
+  },
+  "tokens": {
+    "prompt_mean": 608.86,
+    "completion_mean": 61.8,
+    "reasoning_mean": 51.8,
+    "cached_prompt_share": 0.3181464814024023,
+    "finish_reason_length": 0
+  },
+  "cost": {
+    "total_usd": 0.06832859999999999,
+    "per_1k_predictions_usd": 0.11388099999999998
+  },
+  "requests_answered_from_cache_this_run": 0
+}

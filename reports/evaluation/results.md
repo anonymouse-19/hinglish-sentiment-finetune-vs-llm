@@ -5,6 +5,7 @@
 | Model | Macro-F1 [95% CI] | Accuracy | p50 latency | Cost / 1k predictions | Parameters | Size |
 |---|---|---|---|---|---|---|
 | TF-IDF + LogReg | **0.690** [0.651, 0.726] | 0.685 | 1.9 ms (laptop CPU, batch 1) | $0.000005 | 316k | 6 MB |
+| gpt-oss-120b few-shot | **0.656** [0.622, 0.694] | 0.677 | 702 ms (groq API, incl. network) | $0.1139 | 117B (MoE, 5.1B active) | hosted |
 | gpt-oss-120b zero-shot | **0.637** [0.600, 0.674] | 0.668 | 625 ms (groq API, incl. network) | $0.0681 | 117B (MoE, 5.1B active) | hosted |
 
 ## B. Self-hosted models on the full official test set (3000 tweets)
@@ -18,6 +19,7 @@
 | Model | Code-mixed | Mostly Hindi | Mostly English | YouTube (OOD) |
 |---|---|---|---|---|
 | TF-IDF + LogReg | 0.653 | 0.719 | 0.500 | 0.411 |
+| gpt-oss-120b few-shot | 0.634 | 0.651 | 0.695 | nan |
 | gpt-oss-120b zero-shot | 0.629 | 0.604 | 0.704 | nan |
 
 Bucket sizes: Code-mixed 286, Mostly Hindi 238, Mostly English 74; YouTube 3168.
@@ -26,4 +28,4 @@ Bucket sizes: Code-mixed 286, Mostly Hindi 238, Mostly English 74; YouTube 3168.
 
 | A vs B | Macro-F1(A) − Macro-F1(B) [95% CI] | P(A not better) |
 |---|---|---|
-| gpt-oss-120b zero-shot vs TF-IDF + LogReg | -0.053 [-0.099, -0.009] | 0.991 |
+| gpt-oss-120b few-shot vs TF-IDF + LogReg | -0.034 [-0.078, +0.011] | 0.933 |

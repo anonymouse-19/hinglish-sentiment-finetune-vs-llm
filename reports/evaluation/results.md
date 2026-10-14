@@ -26,6 +26,7 @@ Bucket sizes: Code-mixed 286, Mostly Hindi 238, Mostly English 74; YouTube 300.
 
 ## D. Paired bootstrap: is the difference real?
 
-| A vs B | Macro-F1(A) − Macro-F1(B) [95% CI] | P(A not better) |
-|---|---|---|
-| gpt-oss-120b few-shot vs TF-IDF + LogReg | -0.034 [-0.078, +0.011] | 0.933 |
+| Data | A vs B | Macro-F1(A) − Macro-F1(B) [95% CI] | P(A not better) |
+|---|---|---|---|
+| test (n=600) | gpt-oss-120b few-shot vs TF-IDF + LogReg | -0.034 [-0.078, +0.011] | 0.933 |
+| YouTube (OOD) (n=300) | gpt-oss-120b few-shot vs TF-IDF + LogReg | +0.322 [+0.249, +0.392] | 0.000 |

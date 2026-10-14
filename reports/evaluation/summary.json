@@ -400,6 +400,7 @@
     },
     "paired": [
       {
+        "split": "test",
         "a": "llm_few",
         "b": "tfidf",
         "diff": -0.034433755593824,
@@ -407,6 +408,16 @@
         "ci_high": 0.01089120415091778,
         "p_a_not_better": 0.933,
         "n": 600
+      },
+      {
+        "split": "test_youtube",
+        "a": "llm_few",
+        "b": "tfidf",
+        "diff": 0.32166054347434997,
+        "ci_low": 0.2494440780951416,
+        "ci_high": 0.39219071478853734,
+        "p_a_not_better": 0.0,
+        "n": 300
       }
     ]
   }

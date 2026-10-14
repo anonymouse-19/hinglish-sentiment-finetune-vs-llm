@@ -41,6 +41,7 @@ Every non-trivial decision, including the ones the project owner made when answe
 | D-035 | 4 | Headline on identical tweet IDs for every model, with a paired bootstrap of the macro-F1 difference |
 | D-036 | 4 | Error analysis: most-confident mistakes in every confusion cell; text stays out of git |
 | D-037 | 5 | Shipping: publish the best encoder from Colab; Space = encoder on CPU + Groq few-shot, code installed from GitHub |
+| D-038 | 3–5 | All GPU work, evaluation and publishing run end-to-end in one Colab notebook *(owner's choice)* |
 
 ---
 
@@ -534,3 +535,21 @@ Every non-trivial decision, including the ones the project owner made when answe
   - Publishing 9 training tweets in the Space is a small quotation, like the 10 in the error analysis (D-036).
   - The Space depends on the GitHub repo staying public.
 - **Revisit if:** the QLoRA model wins clearly (then also publish the adapter, demoed via a GPU Space or a merged fp16 model), or the Groq key gets abused (then disable the LLM half and show cached example outputs).
+
+### D-038 — One end-to-end Colab notebook for all GPU work, evaluation and publishing
+- **Date / phase:** 2026-10-15 · Phases 3–5 · *decided by project owner* ("run everything on Colab")
+- **Context:** The owner's laptop has no NVIDIA GPU (i5-1340P, Intel Iris Xe, 16 GB RAM). Encoder fine-tuning would technically run on its CPU, but only at a fraction of a T4's speed. The QLoRA run needs CUDA (bitsandbytes 4-bit) regardless. Before this decision the plan split the work: train on Colab, then evaluate, publish and deploy locally.
+- **Options considered:**
+  1. Train the encoders on the laptop CPU, the decoder on Colab (proposed as a benchmark, which the owner declined).
+  2. Train on Colab, evaluate and publish locally (needs a 1.1 GB model download from Drive).
+  3. **Everything on Colab in one `Run all`**: data rebuild → smoke check → both sweeps → `evaluate_all.py` + error analysis (the Phase 2 baseline predictions are in git, so the comparison runs there) → publish the model with its card → deploy the Space → download one results zip.
+- **Decision:** Option 3. The notebook is generated from `notebooks/build_notebook.py`.
+  - It degrades gracefully: without `WANDB_API_KEY`, W&B runs offline; without `HF_TOKEN`, publishing is skipped.
+  - It reads the Hugging Face username from the token (`whoami`), so the owner edits nothing.
+  - The owner's checklist lives in `docs/OWNER_ACTIONS.md`.
+- **Reasoning:** The owner's choice, and it minimises manual steps: one run, one zip. The laptop isn't tied up for hours. Weights never need downloading. Evaluation runs where the predictions are produced.
+- **Trade-offs accepted:**
+  - A long Colab session can be interrupted. Mitigated by resumable sweeps, results on Drive, and a "Run after" recovery path documented in OWNER_ACTIONS.
+  - Colab's shared T4s make timing slightly noisy (D-033).
+  - Secrets must be added to Colab separately from the local `.env`.
+- **Revisit if:** free Colab GPU access becomes unavailable for days. Then consider Kaggle notebooks (also a free T4/P100), or a few dollars of on-demand cloud GPU.

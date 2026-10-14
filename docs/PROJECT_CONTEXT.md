@@ -1,6 +1,6 @@
 # Project Context: Fine-Tuned Small Model vs Large LLM on Hinglish Sentiment
 
-> **Single source of truth.** Read this first at the start of every session. Last updated: **2026-10-06**. Phase 2: LLM test runs are in progress over the free tier's daily quota. Phase 3: ready for Colab (owner). Phase 4: evaluation tooling built and run on the results so far. Phase 5: publishing and demo tooling prepared.
+> **Single source of truth.** Read this first at the start of every session. Last updated: **2026-10-15**. Phase 2: LLM test runs are in progress over the free tier's daily quota. Phase 3: ready for Colab (owner). Phase 4: evaluation tooling built and run on the results so far. Phase 5: publishing and demo tooling prepared.
 > Companion docs: [DECISION_LOG](DECISION_LOG.md) (why) · [CHALLENGES_LOG](CHALLENGES_LOG.md) (what went wrong) · [DATA_CARD](DATA_CARD.md) (the data in detail).
 
 ---
@@ -160,7 +160,8 @@ flowchart LR
 │   ├── finetune_sweep.py        Phase 3: resumable sweep → pick best on val → reload → test once (--smoke: tiny models on CPU)
 │   ├── evaluate_all.py          Phase 4: tables A–D, headline sentence, 3 figures → reports/evaluation/, reports/figures/
 │   ├── error_analysis.py        Phase 4: confident mistakes per confusion cell → outputs/error_analysis_<model>.md
-│   └── publish.py               Phase 5: push model + card to the HF Hub; refresh card; deploy the Space (--dry-run)
+│   ├── publish.py               Phase 5: push model + card to the HF Hub; refresh card; deploy the Space (--dry-run)
+│   └── relabel.py               optional: owner blind-relabels 40 test tweets → who is right, gold or LLM?
 ├── tests/                       pytest suite (clean, data_pipeline, baselines, finetune, compare, model_card): 70 tests
 ├── data/                        git-ignored: raw/ downloads, processed/ parquet splits + dropped.parquet
 ├── outputs/                     git-ignored: tfidf_lr/model.joblib, llm_cache/responses.jsonl, finetune*/ (smoke runs)
@@ -171,11 +172,13 @@ flowchart LR
 │   ├── finetune/                (from Colab) encoder/ and decoder/: sweep.csv, metrics.json, predictions_*.parquet
 │   └── evaluation/              summary.json + results.md (auto-generated comparison tables)
 ├── notebooks/
-│   └── phase3_finetune_colab.ipynb   Colab T4 notebook: clone → install → data → smoke → encoder sweep → QLoRA sweep → publish to Hub → download reports
+│   ├── build_notebook.py        generates the notebook below (every cell reviewable as code)
+│   └── phase3_finetune_colab.ipynb   one Colab `Run all`: data → smoke → encoder sweep → QLoRA sweep → evaluate → publish model → deploy Space → results zip
 ├── app/
 │   └── app.py                   Gradio side-by-side demo (fine-tuned encoder on CPU vs Groq LLM), deployed to HF Spaces
 └── docs/
     ├── PROJECT_CONTEXT.md       ← you are here
+    ├── OWNER_ACTIONS.md         step-by-step list of what only the owner can do (accounts, secrets, Colab run)
     ├── DECISION_LOG.md          ADR-style decisions D-001 …
     ├── CHALLENGES_LOG.md        real problems C-001 … with STAR stories
     ├── DATA_CARD.md             sources, licences, pipeline, distributions, limitations
@@ -318,20 +321,15 @@ flowchart LR
 
 *Phase 2 (Baselines):* ✅ complete (2026-10-14). TF-IDF (full test + YouTube) and gpt-oss-120b zero-/few-shot on val 200, test 600 and YouTube 300. All results are in `reports/baselines/`, with the comparison in `reports/evaluation/results.md`.
 
-*Phase 3 (Fine-tuning):* 🟡 code complete and pushed to GitHub (`anonymouse-19/hinglish-sentiment-finetune-vs-llm`). Waiting on the Colab run.
+*Phase 3 (Fine-tuning):* 🟡 code complete. **Everything GPU-related runs in one Colab `Run all`** (D-038), owner's preference: sweeps → evaluation → publishing → demo → one results zip.
 
-*Phase 4 (Evaluation):* 🟡 harness built and tested and run on the results so far: tables, paired bootstrap, cost model, 3 figures, error-analysis tool. To finish once all results are in: re-run `evaluate_all.py`, write the 10 explained errors, and write the robustness analysis.
+*Phase 4 (Evaluation):* 🟡 harness complete, and plumbing-tested end-to-end with fine-tuned-model reports. It now includes paired tests on YouTube (OOD) as well as in-domain, both fine-tuned families against the LLM and TF-IDF, and an OOD headline. It runs at the end of the Colab notebook. Optional human check: `scripts/relabel.py` (owner blind-relabels 40 tweets).
 
-*Phase 5 (Ship):* 🟡 prepared: model-card generator, `publish.py` (model / card / space, dry-run tested), Gradio app (tested headlessly with a real Groq call), and a Hub-push section in the Colab notebook. Still to do after results: README final pass, a LICENSE (owner's choice), `INTERVIEW_PREP.md`, and the actual Hub and Space deployment.
+*Phase 5 (Ship):* 🟡 tooling complete (model card with the OOD line, `publish.py`, Gradio app). It runs from the notebook if `HF_TOKEN` is set. Still to do after results: README final pass, LICENSE (owner's choice), `INTERVIEW_PREP.md`.
 
-**Owner actions to unblock Phase 3**
-1. Create an empty public GitHub repo and push (commands in the session summary). Put its URL in the notebook's first cell.
-2. Create a W&B account and add `WANDB_API_KEY` as a Colab secret.
-3. Run `notebooks/phase3_finetune_colab.ipynb` on a T4 (≈ 2 GPU-hours over one or two sessions), then unzip `finetune_reports.zip` into the project.
+**➡ Everything waiting on the owner is listed step by step in [OWNER_ACTIONS.md](OWNER_ACTIONS.md).**
 
-**Then:** analyse the sweeps (MuRIL raw vs demojized, encoder vs QLoRA, learning-rate sensitivity), fill in the tables, and close Phases 2 and 3 with the end-of-phase docs and the difficulties question.
-
-**Open questions for later phases:** the Hugging Face username (the notebook assumes `anonymouse-19`); a licence for the repo code (MIT suggested).
+**Open questions for later phases:** a licence for the repo code (MIT suggested). The Hugging Face username is read from the token automatically.
 
 ## 11. Glossary
 

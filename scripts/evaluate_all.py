@@ -215,7 +215,7 @@ def main() -> None:
 
     # B. full test set, self-hosted models only
     local = [m for m in models if m.family != "llm"]
-    full_ids = list(local[0].predictions["test"].id) if local else []
+    full_ids, _ = subset_ids(local, "test")  # all 3,000 when every local model scored the full test set
     full = score_rows(local, "test", full_ids)
     summary["tables"]["full_test"] = {"n": len(full_ids), "rows": full}
     md += [f"## B. Self-hosted models on the full official test set ({len(full_ids)} tweets)\n", md_table(full), ""]
@@ -234,30 +234,45 @@ def main() -> None:
     md += [f"\nBucket sizes: " + ", ".join(f"{l} {buckets[head[0]['key']][b]['n']}" for b, l in BUCKETS)
            + f"; YouTube {len(yt_ids)}.", ""]
 
-    # D. paired comparisons on the headline tweets
-    preds = {m.key: on_ids(m.predictions[head_split], ids) for m in models if head_split in m.predictions}
-    best_ft = max((r for r in head if r["family"] == "fine-tuned"), key=lambda r: r["macro_f1"], default=None)
+    # D. paired comparisons, in-domain (headline tweets) and out-of-domain (YouTube subset)
+    names = {m.key: m.name for m in models}
     best_llm = max((r for r in head if r["family"] == "llm"), key=lambda r: r["macro_f1"], default=None)
-    pairs = [(a["key"], b) for a in [best_ft] if a for b in ([best_llm["key"]] if best_llm else []) + ["tfidf"]]
+    fine_tuned = [r["key"] for r in head if r["family"] == "fine-tuned"]
+    pairs = [(f, b) for f in fine_tuned for b in ([best_llm["key"]] if best_llm else []) + ["tfidf"]]
+    if len(fine_tuned) == 2:
+        pairs.append(tuple(fine_tuned))           # encoder vs QLoRA decoder
     if best_llm:
         pairs.append((best_llm["key"], "tfidf"))
     tests = []
-    for a, b in pairs:
-        if a in preds and b in preds and a != b:
-            t = paired_bootstrap(preds[a].label_id, preds[a].pred_id, preds[b].pred_id)
-            tests.append({"a": a, "b": b, **t})
+    for split, split_ids in ((head_split, ids), ("test_youtube", yt_ids)):
+        preds = {m.key: on_ids(m.predictions[split], split_ids) for m in models if split in m.predictions}
+        for a, b in pairs:
+            if a in preds and b in preds and a != b and split_ids:
+                t = paired_bootstrap(preds[a].label_id, preds[a].pred_id, preds[b].pred_id)
+                tests.append({"split": split, "a": a, "b": b, **t})
     summary["tables"]["paired"] = tests
-    names = {m.key: m.name for m in models}
-    md += ["## D. Paired bootstrap: is the difference real?\n", "| A vs B | Macro-F1(A) − Macro-F1(B) [95% CI] | P(A not better) |", "|---|---|---|"]
-    md += [f"| {names[t['a']]} vs {names[t['b']]} | {t['diff']:+.3f} [{t['ci_low']:+.3f}, {t['ci_high']:+.3f}] | {t['p_a_not_better']:.3f} |" for t in tests]
+    md += ["## D. Paired bootstrap: is the difference real?\n",
+           "| Data | A vs B | Macro-F1(A) − Macro-F1(B) [95% CI] | P(A not better) |", "|---|---|---|---|"]
+    md += [f"| {'YouTube (OOD)' if t['split'] == 'test_youtube' else t['split']} (n={t['n']}) | {names[t['a']]} vs {names[t['b']]} "
+           f"| {t['diff']:+.3f} [{t['ci_low']:+.3f}, {t['ci_high']:+.3f}] | {t['p_a_not_better']:.3f} |" for t in tests]
 
-    # E. headline sentence
+    # E. headline sentences: in-domain, and out-of-domain
+    best_ft = max((r for r in head if r["family"] == "fine-tuned"), key=lambda r: r["macro_f1"], default=None)
     if best_ft and best_llm:
         ratio_f1 = best_ft["macro_f1"] / best_llm["macro_f1"]
         ratio_cost = best_llm["usd_per_1k"] / best_ft["usd_per_1k"]
-        summary["headline"] = {"fine_tuned": best_ft["name"], "llm": best_llm["name"], "f1_ratio": ratio_f1, "cost_ratio": ratio_cost}
-        md += ["", f"**Headline:** {best_ft['name']} reaches **{ratio_f1:.0%}** of {best_llm['name']}'s macro-F1 "
+        yt_by_key = {r["key"]: r["macro_f1"] for r in yt}
+        ood = {}
+        if best_ft["key"] in yt_by_key and best_llm["key"] in yt_by_key:
+            ood = {"fine_tuned_f1": yt_by_key[best_ft["key"]], "llm_f1": yt_by_key[best_llm["key"]],
+                   "f1_ratio": yt_by_key[best_ft["key"]] / yt_by_key[best_llm["key"]]}
+        summary["headline"] = {"fine_tuned": best_ft["name"], "llm": best_llm["name"], "f1_ratio": ratio_f1,
+                               "cost_ratio": ratio_cost, "ood": ood}
+        md += ["", f"**Headline (in-domain):** {best_ft['name']} reaches **{ratio_f1:.0%}** of {best_llm['name']}'s macro-F1 "
                    f"at **{ratio_cost:,.0f}× lower cost** per prediction ({head_split}, n={len(ids)})."]
+        if ood:
+            md += [f"**Out of domain (YouTube, n={len(yt_ids)}):** {ood['fine_tuned_f1']:.3f} vs {ood['llm_f1']:.3f} "
+                   f"= **{ood['f1_ratio']:.0%}** of the LLM's macro-F1."]
 
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
     (out_dir / "results.md").write_text("\n".join(md) + "\n", encoding="utf-8")

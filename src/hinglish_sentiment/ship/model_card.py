@@ -51,7 +51,10 @@ All models on the same {head['n']} {head['split']} tweets (latency: see the repo
 |---|---|---|---|
 """ + "\n".join(lines) + ("" if not hl else f"""
 
-**{hl['fine_tuned']} reaches {hl['f1_ratio']:.0%} of {hl['llm']}'s macro-F1 at {hl['cost_ratio']:,.0f}× lower cost per prediction.**""") + "\n"
+**{hl['fine_tuned']} reaches {hl['f1_ratio']:.0%} of {hl['llm']}'s macro-F1 at {hl['cost_ratio']:,.0f}× lower cost per prediction.**""") + (
+            "" if not (hl and hl.get("ood")) else
+            f"\nOn out-of-domain YouTube comments it scores {hl['ood']['fine_tuned_f1']:.3f} vs the LLM's "
+            f"{hl['ood']['llm_f1']:.3f} ({hl['ood']['f1_ratio']:.0%} of the LLM).") + "\n"
 
     usage_pre = ("import emoji\n\ndef preprocess(text):  # this model was trained with emoji rewritten as text\n"
                  "    return \" \".join(emoji.demojize(text, delimiters=(\" :\", \": \")).split())\n\n") if demojize else ""

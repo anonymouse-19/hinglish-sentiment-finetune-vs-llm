@@ -182,7 +182,7 @@ flowchart LR
     ├── DECISION_LOG.md          ADR-style decisions D-001 …
     ├── CHALLENGES_LOG.md        real problems C-001 … with STAR stories
     ├── DATA_CARD.md             sources, licences, pipeline, distributions, limitations
-    └── INTERVIEW_PREP.md        (Phase 5)
+    └── INTERVIEW_PREP.md        pitches, ~19 Q&As tied to D-/C- entries, STAR stories (draft; ⟨TBD⟩ = fine-tuning numbers)
 ```
 
 ## 8. How each component works (plain English)
@@ -325,7 +325,7 @@ flowchart LR
 
 *Phase 4 (Evaluation):* 🟡 harness complete, and plumbing-tested end-to-end with fine-tuned-model reports. It now includes paired tests on YouTube (OOD) as well as in-domain, both fine-tuned families against the LLM and TF-IDF, and an OOD headline. It runs at the end of the Colab notebook. Optional human check: `scripts/relabel.py` (owner blind-relabels 40 tweets).
 
-*Phase 5 (Ship):* 🟡 tooling complete (model card with the OOD line, `publish.py`, Gradio app). It runs from the notebook if `HF_TOKEN` is set. Still to do after results: README final pass, LICENSE (owner's choice), `INTERVIEW_PREP.md`.
+*Phase 5 (Ship):* 🟡 tooling complete (model card with the OOD line, `publish.py`, Gradio app). It runs from the notebook if `HF_TOKEN` is set. `INTERVIEW_PREP.md` is drafted, with ⟨TBD⟩ placeholders for the fine-tuning numbers. Still to do after results: fill those in, README final pass, LICENSE (owner's choice).
 
 **➡ Everything waiting on the owner is listed step by step in [OWNER_ACTIONS.md](OWNER_ACTIONS.md).**
 

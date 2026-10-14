@@ -86,9 +86,13 @@ It reports how often you agree with the dataset vs with the LLM on the tweets wh
 
 ---
 
+## While you wait: read the interview-prep draft (optional)
+
+[INTERVIEW_PREP.md](INTERVIEW_PREP.md) already has the pitches, ~19 likely questions with answers, and STAR stories. Only the ⟨TBD⟩ spots need the fine-tuning numbers. Ask Claude to explain any answer you can't yet say in your own words.
+
 ## What Claude does once you're back
 - Sweep analysis: XLM-R vs MuRIL, emoji→text ablation, learning-rate sensitivity, encoder vs QLoRA.
 - Final comparison tables and the headline, in-domain and out-of-domain (YouTube).
 - 10 explained errors and the robustness analysis.
-- README final pass, licence file, `docs/INTERVIEW_PREP.md`.
+- README final pass, licence file, fill the ⟨TBD⟩ spots in `docs/INTERVIEW_PREP.md`.
 - Close Phases 3–5 in the docs.

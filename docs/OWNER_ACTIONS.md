@@ -2,7 +2,7 @@
 
 > **Working alone? Follow [SOLO_TODO.md](SOLO_TODO.md)**: the full step-by-step list, including the parts Claude would normally do.
 > Everything else is automated. This file is the single list of what needs **you** (accounts, secrets, the Colab run, decisions).
-> Last updated: **2026-10-15**. Claude ticks items off here as they're done.
+> Last updated: **2026-10-26**. Tick items off here as they're done.
 
 ## Where things stand
 
@@ -67,7 +67,7 @@ If you skip this, training still works; the charts are just saved offline instea
 1. Find `finetune_results.zip` in your Downloads.
 2. **Unzip it into the project folder** (`AIML — Fine-Tuned Small Model vs Large LLM (CostAccuracy Study)`), choosing **replace/merge** if asked.
    Afterwards these folders should exist: `reports\finetune\encoder\`, `reports\finetune\decoder\` and `reports\evaluation\`.
-3. Tell Claude: **"results are in"**.
+3. Tell Claude **"results are in"**, or continue yourself from [SOLO_TODO.md](SOLO_TODO.md) Part 3.3.
 
 ## Step 5: One decision ☐
 
@@ -91,7 +91,7 @@ It reports how often you agree with the dataset vs with the LLM on the tweets wh
 
 [INTERVIEW_PREP.md](INTERVIEW_PREP.md) already has the pitches, ~19 likely questions with answers, and STAR stories. Only the ⟨TBD⟩ spots need the fine-tuning numbers. Ask Claude to explain any answer you can't yet say in your own words.
 
-## What Claude does once you're back
+## What happens after the run (Claude, or you via [SOLO_TODO.md](SOLO_TODO.md) Parts 5–9)
 - Sweep analysis: XLM-R vs MuRIL, emoji→text ablation, learning-rate sensitivity, encoder vs QLoRA.
 - Final comparison tables and the headline, in-domain and out-of-domain (YouTube).
 - 10 explained errors and the robustness analysis.

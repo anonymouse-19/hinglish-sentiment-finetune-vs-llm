@@ -8,7 +8,7 @@ This project compares, on the same data and metrics:
 - a **fine-tuned multilingual encoder** (XLM-R / MuRIL), and
 - a **LoRA/QLoRA fine-tuned small decoder** (~1–3B), all trained on a **free Colab T4**.
 
-> **Status:** Phase 1 (data) ✅ · Phase 2 (baselines) ✅ · Phase 3 (fine-tuning) ⏳ code ready, Colab runs next · (fine-tuning) · Phase 4 (evaluation) · Phase 5 (ship)
+> **Status:** Phase 1 (data) ✅ · Phase 2 (baselines) ✅ · Phase 3 (fine-tuning) ⏳ code ready, Colab run next · Phase 4 (evaluation) ⏳ tooling ready · Phase 5 (ship) ⏳ tooling ready
 
 ## Results
 
@@ -59,7 +59,7 @@ pip install -r requirements.txt
 pip install -e .
 python scripts/prepare_data.py  # downloads pinned data, cleans, dedupes, splits (~1 min, CPU)
 python scripts/plot_data.py     # figures in reports/figures/
-pytest -q                       # 62 tests, offline
+pytest -q                       # 70 tests, offline
 
 # Phase 2: baselines
 python scripts/train_tfidf.py   # TF-IDF + LogReg grid on val, then test/YouTube (~3 min, CPU)
@@ -94,7 +94,7 @@ src/hinglish_sentiment/  library code: data pipeline, metrics, TF-IDF baseline, 
 scripts/                 pipeline entry points
 tests/                   pytest suite
 reports/                 statistics + figures
-docs/                    project context, decision log, challenges log, data card
+docs/                    project context, decision log, challenges log, data card, owner to-dos, interview prep
 ```
 
 ## Documentation
@@ -103,6 +103,7 @@ docs/                    project context, decision log, challenges log, data car
 - [Decision log](docs/DECISION_LOG.md): every non-trivial choice, with the alternatives considered
 - [Challenges log](docs/CHALLENGES_LOG.md): what went wrong and how it was fixed
 - [Data card](docs/DATA_CARD.md): sources, licences, pipeline, distributions, limitations
+- [Owner actions](docs/OWNER_ACTIONS.md) and [solo to-do](docs/SOLO_TODO.md): the remaining steps (Colab run, publishing, final docs)
 
 ## Citation for the data
 

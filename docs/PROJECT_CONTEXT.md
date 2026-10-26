@@ -1,6 +1,6 @@
 # Project Context: Fine-Tuned Small Model vs Large LLM on Hinglish Sentiment
 
-> **Single source of truth.** Read this first at the start of every session. Last updated: **2026-10-15**. Phase 2: LLM test runs are in progress over the free tier's daily quota. Phase 3: ready for Colab (owner). Phase 4: evaluation tooling built and run on the results so far. Phase 5: publishing and demo tooling prepared.
+> **Single source of truth.** Read this first at the start of every session. Last updated: **2026-10-26**. Phase 2: complete. Phase 3: code ready; waiting on the owner's Colab run. Phase 4: evaluation tooling built and run on the results so far. Phase 5: publishing and demo tooling prepared.
 > Companion docs: [DECISION_LOG](DECISION_LOG.md) (why) · [CHALLENGES_LOG](CHALLENGES_LOG.md) (what went wrong) · [DATA_CARD](DATA_CARD.md) (the data in detail).
 
 ---
@@ -179,6 +179,7 @@ flowchart LR
 └── docs/
     ├── PROJECT_CONTEXT.md       ← you are here
     ├── OWNER_ACTIONS.md         step-by-step list of what only the owner can do (accounts, secrets, Colab run)
+    ├── SOLO_TODO.md             full step-by-step finish list (Colab run → analysis → docs → licence) for working without Claude
     ├── DECISION_LOG.md          ADR-style decisions D-001 …
     ├── CHALLENGES_LOG.md        real problems C-001 … with STAR stories
     ├── DATA_CARD.md             sources, licences, pipeline, distributions, limitations
@@ -328,6 +329,8 @@ flowchart LR
 *Phase 5 (Ship):* 🟡 tooling complete (model card with the OOD line, `publish.py`, Gradio app). It runs from the notebook if `HF_TOKEN` is set. `INTERVIEW_PREP.md` is drafted, with ⟨TBD⟩ placeholders for the fine-tuning numbers. Still to do after results: fill those in, README final pass, LICENSE (owner's choice).
 
 **➡ Everything waiting on the owner is listed step by step in [OWNER_ACTIONS.md](OWNER_ACTIONS.md).**
+
+**➡ Finishing alone? [SOLO_TODO.md](SOLO_TODO.md) covers every remaining step, including the sweep analysis, error analysis and doc updates.**
 
 **Open questions for later phases:** a licence for the repo code (MIT suggested). The Hugging Face username is read from the token automatically.
 

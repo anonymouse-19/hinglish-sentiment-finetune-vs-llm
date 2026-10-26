@@ -1,5 +1,6 @@
 # Owner actions: what only you can do
 
+> **Working alone? Follow [SOLO_TODO.md](SOLO_TODO.md)**: the full step-by-step list, including the parts Claude would normally do.
 > Everything else is automated. This file is the single list of what needs **you** (accounts, secrets, the Colab run, decisions).
 > Last updated: **2026-10-15**. Claude ticks items off here as they're done.
 
